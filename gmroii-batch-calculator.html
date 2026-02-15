@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GMROII Batch Calculator</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --border: #dce1e8;
+  --text: #1a2332;
+  --muted: #5a6a7e;
+  --accent: #2563eb;
+  --accent-light: #dbeafe;
+  --green: #16a34a;
+  --green-light: #dcfce7;
+  --red: #dc2626;
+  --red-light: #fee2e2;
+  --orange: #ea580c;
+  --orange-light: #ffedd5;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding: 24px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+.subtitle { color: var(--muted); font-size: 0.875rem; margin-bottom: 24px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.card h2 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+/* Upload Zone */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 16px;
+}
+
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.upload-zone p { color: var(--muted); font-size: 0.9rem; margin-top: 8px; }
+.upload-zone .upload-icon { font-size: 2rem; color: var(--muted); }
+
+.upload-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover { background: #1d4ed8; }
+
+.status-text { color: var(--muted); font-size: 0.85rem; }
+
+/* Portfolio Summary */
+.portfolio-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.summary-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.summary-card .s-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.summary-card .s-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-top: 4px;
+  line-height: 1.2;
+}
+
+.summary-card .s-sub {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.summary-card.highlight { border-color: var(--accent); background: linear-gradient(135deg, var(--accent-light) 0%, #fff 100%); }
+.summary-card.highlight .s-value { color: var(--accent); }
+.summary-card.positive .s-value { color: var(--green); }
+.summary-card.negative .s-value { color: var(--red); }
+
+/* Summary Table */
+.table-wrapper { overflow-x: auto; max-height: 70vh; overflow-y: auto; }
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.summary-table thead { position: sticky; top: 0; z-index: 10; }
+
+.summary-table th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--border);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  background: var(--card);
+}
+
+.summary-table th:hover { color: var(--accent); }
+.summary-table th .sort-arrow { margin-left: 4px; font-size: 0.6rem; }
+
+.summary-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-table tbody tr.data-row { cursor: pointer; transition: background 0.1s; }
+.summary-table tbody tr.data-row:hover { background: #f0f4ff; }
+
+.summary-table tbody tr.row-red { background: #fff5f5; }
+.summary-table tbody tr.row-red:hover { background: #fee2e2; }
+.summary-table tbody tr.row-green { background: #f0fdf4; }
+.summary-table tbody tr.row-green:hover { background: #dcfce7; }
+
+.summary-table tbody tr.expanded { background: var(--accent-light); }
+
+/* Detail Panel (expandable row) */
+.detail-row td { padding: 0 !important; border-bottom: 2px solid var(--accent); }
+.detail-panel { padding: 20px; background: #fafbfd; }
+
+.detail-panel .detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.detail-panel .detail-title { font-size: 1rem; font-weight: 700; }
+
+.detail-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.detail-metrics .metric-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  box-shadow: var(--shadow);
+}
+
+.detail-metrics .metric-card .metric-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.detail-metrics .metric-card .metric-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.detail-metrics .metric-card .metric-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.detail-metrics .metric-card.highlight { border-color: var(--accent); background: linear-gradient(135deg, var(--accent-light) 0%, #fff 100%); }
+.detail-metrics .metric-card.highlight .metric-value { color: var(--accent); }
+.detail-metrics .metric-card.positive .metric-value { color: var(--green); }
+.detail-metrics .metric-card.negative .metric-value { color: var(--red); }
+
+.cashflow-ok { color: var(--green); font-weight: 600; }
+.cashflow-warn { color: var(--orange); font-weight: 600; }
+.cashflow-bad { color: var(--red); font-weight: 600; }
+
+/* Detail sub-sections */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Controls in detail panel */
+.detail-controls {
+  display: flex;
+  gap: 16px;
+  align-items: end;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.detail-controls .field label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.detail-controls .slider-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-controls .slider-group input[type="range"] {
+  width: 200px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.detail-controls .slider-group input[type="number"] {
+  width: 65px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.detail-controls .slider-group input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.detail-controls select {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: #fff;
+}
+
+.detail-controls select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+/* Chart Container */
+.chart-container {
+  position: relative;
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 20px 0 30px 50px;
+}
+
+.chart-y-axis {
+  position: absolute;
+  left: 0;
+  top: 20px;
+  bottom: 30px;
+  width: 46px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-right: 6px;
+}
+
+.chart-y-axis span { font-size: 0.65rem; color: var(--muted); }
+
+.bar-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.bar {
+  width: 80%;
+  max-width: 36px;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.3s ease;
+  min-height: 2px;
+  position: relative;
+}
+
+.bar-label { font-size: 0.6rem; color: var(--muted); margin-top: 4px; white-space: nowrap; text-align: center; }
+.bar-value { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; font-weight: 600; white-space: nowrap; }
+
+.chart-title { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 8px; }
+
+/* Comparison Table inside detail */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.comparison-table th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--border);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.comparison-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.comparison-table tr.optimal { background: var(--green-light); font-weight: 600; }
+.comparison-table tr.current { background: var(--accent-light); }
+.comparison-table tr:hover { background: #f0f4ff; }
+
+.tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.tag-optimal { background: var(--green-light); color: var(--green); }
+.tag-current { background: var(--accent-light); color: var(--accent); }
+
+.info-tip {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  line-height: 15px;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-weight: 700;
+  cursor: help;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.hidden { display: none; }
+
+@media (max-width: 900px) {
+  .detail-grid { grid-template-columns: 1fr; }
+  .detail-metrics { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .portfolio-summary { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+}
+
+@media (max-width: 600px) {
+  body { padding: 12px; }
+  .detail-controls .slider-group input[type="range"] { width: 120px; }
+}
+</style>
+</head>
+<body>
+
+<h1>GMROII Batch Calculator</h1>
+<p class="subtitle">Upload a CSV with multiple titles to calculate GMROII, optimal order quantities, and portfolio metrics &mdash; based on Shatzkin's <em>The Mathematics of Bookselling</em></p>
+
+<!-- UPLOAD SECTION -->
+<div class="card">
+  <h2>Upload Data</h2>
+  <div class="upload-zone" id="uploadZone">
+    <div class="upload-icon">&#128196;</div>
+    <p>Drag &amp; drop a CSV file here, or click to browse</p>
+    <input type="file" id="fileInput" accept=".csv" style="display:none;">
+  </div>
+  <details style="margin-bottom:16px;font-size:0.84rem;line-height:1.6;">
+    <summary style="cursor:pointer;font-weight:600;color:var(--accent);font-size:0.82rem;">CSV file format requirements</summary>
+    <div style="margin-top:10px;padding:14px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius);">
+      <p style="margin-bottom:8px;">The CSV file must contain a <strong>header row</strong> followed by data rows. Two formats are accepted:</p>
+      <p style="margin-bottom:4px;font-weight:600;font-size:0.78rem;text-transform:uppercase;color:var(--muted);">6-column format (with title):</p>
+      <pre style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:0.8rem;overflow-x:auto;margin-bottom:10px;"><code>ISBN,Title,Purchase Price,Sale Price,Units Sold,Current Stock
+978-0-06-112008-4,To Kill a Mockingbird,8.40,14.00,12,4
+978-0-14-028329-7,The Great Gatsby,6.00,12.00,6,8</code></pre>
+      <p style="margin-bottom:4px;font-weight:600;font-size:0.78rem;text-transform:uppercase;color:var(--muted);">5-column format (without title):</p>
+      <pre style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:0.8rem;overflow-x:auto;margin-bottom:12px;"><code>ISBN,Purchase Price,Sale Price,Units Sold,Current Stock
+978-0-06-112008-4,8.40,14.00,12,4</code></pre>
+      <table style="width:100%;border-collapse:collapse;font-size:0.8rem;margin-bottom:8px;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border);">
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.7rem;text-transform:uppercase;">Column</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.7rem;text-transform:uppercase;">Type</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.7rem;text-transform:uppercase;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 8px;font-weight:600;">ISBN</td><td style="padding:5px 8px;">Text</td><td style="padding:5px 8px;">Identifier for the title (ISBN, SKU, or any code)</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 8px;font-weight:600;">Title</td><td style="padding:5px 8px;">Text</td><td style="padding:5px 8px;">Book title (optional column; must not contain commas)</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 8px;font-weight:600;">Purchase Price</td><td style="padding:5px 8px;">Number</td><td style="padding:5px 8px;">Cost per copy paid to the supplier (e.g. <code>8.40</code>)</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 8px;font-weight:600;">Sale Price</td><td style="padding:5px 8px;">Number</td><td style="padding:5px 8px;">Retail selling price (must be greater than Purchase Price)</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 8px;font-weight:600;">Units Sold</td><td style="padding:5px 8px;">Number</td><td style="padding:5px 8px;">Copies sold in the last 4 weeks (reference period)</td></tr>
+          <tr><td style="padding:5px 8px;font-weight:600;">Current Stock</td><td style="padding:5px 8px;">Integer</td><td style="padding:5px 8px;">Copies currently on hand</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.78rem;color:var(--muted);">Separator: comma (<code>,</code>) or semicolon (<code>;</code>) &mdash; detected automatically. The header row is skipped automatically if it contains keywords like "ISBN", "Price", or "Stock".</p>
+    </div>
+  </details>
+  <div class="upload-actions">
+    <button class="btn btn-primary" id="btnSample">Load Sample Data</button>
+    <button class="btn" id="btnExport" disabled>Export Results CSV</button>
+    <div style="display:inline-flex;align-items:center;gap:6px;margin-left:8px;">
+      <label for="globalFreq" style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;">Reorder Frequency:</label>
+      <select id="globalFreq" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;background:#fff;">
+        <option value="7">Weekly</option>
+        <option value="14" selected>Biweekly</option>
+        <option value="30">Monthly</option>
+      </select>
+    </div>
+    <div style="display:inline-flex;align-items:center;gap:6px;margin-left:8px;">
+      <label for="globalLeadTime" style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;">Lead Time:</label>
+      <input type="number" id="globalLeadTime" min="0" max="90" step="1" value="7" style="width:55px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;text-align:center;">
+      <span style="font-size:0.8rem;color:var(--muted);">days</span>
+    </div>
+    <span class="status-text" id="statusText">No data loaded</span>
+  </div>
+</div>
+
+<!-- LEXICON -->
+<details class="card" style="cursor:default;">
+  <summary style="cursor:pointer;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);font-weight:600;">Lexicon &mdash; Parameter Definitions</summary>
+  <div style="margin-top:12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+    <label for="lexiconLang" style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;">Language:</label>
+    <select id="lexiconLang" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;background:#fff;">
+      <option value="ro" selected>Română</option>
+      <option value="en">English</option>
+      <option value="de">Deutsch</option>
+      <option value="fr">Français</option>
+    </select>
+  </div>
+  <div id="lexiconContent" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:12px 24px;font-size:0.84rem;line-height:1.6;"></div>
+</details>
+
+<!-- PORTFOLIO SUMMARY -->
+<div id="portfolioSection" class="hidden">
+  <div class="card">
+    <h2>Portfolio Summary</h2>
+    <div class="portfolio-summary" id="portfolioSummary"></div>
+  </div>
+
+  <!-- SUMMARY TABLE -->
+  <div class="card">
+    <h2>Title Analysis</h2>
+    <div class="table-wrapper">
+      <table class="summary-table">
+        <thead>
+          <tr id="tableHead"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+
+  // ========== STATE ==========
+  let titles = [];       // parsed data
+  let results = [];      // calculated results
+  let sortCol = 'isbn';
+  let sortAsc = true;
+  let expandedIdx = -1;  // index of currently expanded row
+
+  // ========== DOM REFS ==========
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('fileInput');
+  const btnSample = document.getElementById('btnSample');
+  const btnExport = document.getElementById('btnExport');
+  const globalFreq = document.getElementById('globalFreq');
+  const globalLeadTime = document.getElementById('globalLeadTime');
+  const statusText = document.getElementById('statusText');
+  const portfolioSection = document.getElementById('portfolioSection');
+  const portfolioSummary = document.getElementById('portfolioSummary');
+  const tableHead = document.getElementById('tableHead');
+  const tableBody = document.getElementById('tableBody');
+
+  // ========== CORE CALCULATIONS (from gmroii-calculator.html) ==========
+  function calcMetrics(inp, overrideOrderQty) {
+    const qty = overrideOrderQty !== undefined ? overrideOrderQty : inp.orderQty;
+    const d = inp.discount;
+    const p = inp.price;
+    const costPerCopy = p * (1 - d);
+    const marginPerCopy = p * d;
+    const marginPerDollar = d > 0 && d < 1 ? d / (1 - d) : 0;
+    const gmros = d;
+
+    const reorderWeeks = inp.reorderDays / 7;
+    const avgUnits = inp.stock + qty / 2;
+    const avgInvAtCost = avgUnits * costPerCopy;
+
+    const annualSalesUnits = inp.salesPerWeek * 52;
+    const stockTurn = avgInvAtCost > 0 ? (annualSalesUnits * costPerCopy) / avgInvAtCost : 0;
+
+    const gmroii = marginPerDollar * stockTurn;
+    const annualGrossMargin = avgInvAtCost > 0 ? gmroii * avgInvAtCost : 0;
+
+    const paymentDays = inp.paymentDays || 30;
+    const revByDeadline = inp.salesPerWeek * (paymentDays / 7) * p;
+    const orderCost = qty * costPerCopy;
+    const daysToRecover = inp.salesPerWeek > 0 ? (orderCost / (inp.salesPerWeek * p)) * 7 : Infinity;
+
+    let cashflow = 'ok';
+    let cashflowText = '';
+    if (orderCost > 0) {
+      if (revByDeadline >= orderCost) {
+        cashflow = 'ok';
+        cashflowText = 'Sales cover invoice within ' + paymentDays + ' days';
+      } else {
+        cashflow = 'bad';
+        cashflowText = daysToRecover === Infinity
+          ? 'No sales to recover cost'
+          : '~' + Math.ceil(daysToRecover) + ' days to recover (deadline: ' + paymentDays + 'd)';
+      }
+    } else {
+      cashflowText = 'No order placed';
+    }
+
+    return {
+      costPerCopy, marginPerCopy, marginPerDollar, gmros,
+      avgUnits, avgInvAtCost, stockTurn, gmroii, annualGrossMargin,
+      cashflow, cashflowText, orderCost, daysToRecover: Math.ceil(daysToRecover), paymentDays
+    };
+  }
+
+  // ========== FIND OPTIMAL ORDER ==========
+  // qty must cover demand during reorder cycle + lead time
+  function findOptimalOrder(title, reorderDays, leadTimeDays) {
+    const coverageDays = reorderDays + leadTimeDays;
+    const coverageWeeks = coverageDays / 7;
+    const qty = Math.max(1, Math.ceil(title.salesPerWeek * coverageWeeks));
+    const inp = {
+      price: title.salePrice,
+      discount: title.discount,
+      stock: title.currentStock,
+      salesPerWeek: title.salesPerWeek,
+      orderQty: qty,
+      reorderDays: reorderDays
+    };
+    const m = calcMetrics(inp);
+    return { orderQty: qty, reorderDays: reorderDays, gmroii: m.gmroii };
+  }
+
+  // ========== CSV PARSING ==========
+  function parseCSV(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) throw new Error('CSV must have a header row and at least one data row.');
+
+    // Detect separator
+    const sep = lines[0].includes(';') ? ';' : ',';
+
+    // Skip header
+    const header = lines[0].toLowerCase();
+    const startIdx = (header.includes('isbn') || header.includes('price') || header.includes('stock') || header.includes('title')) ? 1 : 0;
+
+    // Detect if Title column is present (6 columns = with title, 5 = without)
+    const sampleParts = lines[startIdx] ? lines[startIdx].split(sep) : [];
+    const hasTitle = sampleParts.length >= 6;
+
+    const parsed = [];
+    for (let i = startIdx; i < lines.length; i++) {
+      const parts = lines[i].split(sep).map(s => s.trim());
+      if (hasTitle && parts.length < 6) continue;
+      if (!hasTitle && parts.length < 5) continue;
+
+      let isbn, title, purchasePrice, salePrice, unitsSold, currentStock;
+      if (hasTitle) {
+        isbn = parts[0];
+        title = parts[1];
+        purchasePrice = parseFloat(parts[2]);
+        salePrice = parseFloat(parts[3]);
+        unitsSold = parseFloat(parts[4]);
+        currentStock = parseInt(parts[5]);
+      } else {
+        isbn = parts[0];
+        title = '';
+        purchasePrice = parseFloat(parts[1]);
+        salePrice = parseFloat(parts[2]);
+        unitsSold = parseFloat(parts[3]);
+        currentStock = parseInt(parts[4]);
+      }
+
+      if (isNaN(purchasePrice) || isNaN(salePrice) || isNaN(unitsSold) || isNaN(currentStock)) continue;
+      if (salePrice <= 0) continue;
+
+      const salesPerWeek = unitsSold / 4;
+      const discount = (salePrice - purchasePrice) / salePrice;
+
+      parsed.push({ isbn, title, purchasePrice, salePrice, discount, unitsSold, currentStock, salesPerWeek });
+    }
+
+    if (parsed.length === 0) throw new Error('No valid data rows found in CSV.');
+    return parsed;
+  }
+
+  // ========== SAMPLE DATA ==========
+  function getSampleData() {
+    return [
+      { isbn: '978-0-06-112008-4', title: 'To Kill a Mockingbird', purchasePrice: 8.40, salePrice: 14.00, unitsSold: 12, currentStock: 4 },
+      { isbn: '978-0-14-028329-7', title: 'The Great Gatsby', purchasePrice: 6.00, salePrice: 12.00, unitsSold: 6, currentStock: 8 },
+      { isbn: '978-0-7432-7356-5', title: 'The Road', purchasePrice: 10.80, salePrice: 18.00, unitsSold: 3, currentStock: 10 },
+      { isbn: '978-0-316-76948-0', title: 'The Catcher in the Rye', purchasePrice: 9.60, salePrice: 16.00, unitsSold: 20, currentStock: 3 },
+      { isbn: '978-0-452-28423-4', title: '1984', purchasePrice: 7.20, salePrice: 12.00, unitsSold: 1, currentStock: 6 },
+      { isbn: '978-0-06-093546-7', title: 'Sapiens', purchasePrice: 12.00, salePrice: 20.00, unitsSold: 8, currentStock: 5 }
+    ].map(t => ({
+      ...t,
+      salesPerWeek: t.unitsSold / 4,
+      discount: (t.salePrice - t.purchasePrice) / t.salePrice
+    }));
+  }
+
+  // ========== PROCESS TITLES ==========
+  function processTitles(data) {
+    titles = data;
+    recalcAll();
+  }
+
+  function recalcAll() {
+    const reorderDays = parseInt(globalFreq.value) || 14;
+    const leadTimeDays = parseInt(globalLeadTime.value) || 0;
+    results = titles.map(t => {
+      const optimal = findOptimalOrder(t, reorderDays, leadTimeDays);
+      const inp = {
+        price: t.salePrice,
+        discount: t.discount,
+        stock: t.currentStock,
+        salesPerWeek: t.salesPerWeek,
+        orderQty: optimal.orderQty,
+        reorderDays: optimal.reorderDays
+      };
+      const m = calcMetrics(inp);
+      return { ...t, optimal, metrics: m };
+    });
+
+    expandedIdx = -1;
+    statusText.textContent = results.length + ' titles loaded';
+    btnExport.disabled = false;
+    portfolioSection.classList.remove('hidden');
+    renderPortfolio();
+    renderTable();
+  }
+
+  // ========== PORTFOLIO SUMMARY ==========
+  function renderPortfolio() {
+    let totalInvCost = 0;
+    let totalAnnualMargin = 0;
+    let totalWeightedGmroii = 0;
+    let totalStockTurn = 0;
+    let lowGmroii = 0;
+
+    results.forEach(r => {
+      totalInvCost += r.metrics.avgInvAtCost;
+      totalAnnualMargin += r.metrics.annualGrossMargin;
+      totalStockTurn += r.metrics.stockTurn;
+      if (r.metrics.gmroii < 1) lowGmroii++;
+    });
+
+    const portfolioGmroii = totalInvCost > 0 ? totalAnnualMargin / totalInvCost : 0;
+    const avgStockTurn = results.length > 0 ? totalStockTurn / results.length : 0;
+
+    portfolioSummary.innerHTML = [
+      { label: 'Total Titles', value: results.length, sub: 'in portfolio', cls: '' },
+      { label: 'Total Inventory (cost)', value: '$' + totalInvCost.toFixed(0), sub: 'average at cost', cls: '' },
+      { label: 'Portfolio GMROII', value: portfolioGmroii.toFixed(2), sub: 'weighted by inventory', cls: 'highlight' },
+      { label: 'Annual Gross Margin', value: '$' + totalAnnualMargin.toFixed(0), sub: 'all titles combined', cls: portfolioGmroii >= 1 ? 'positive' : 'negative' },
+      { label: 'Avg Stock Turn', value: avgStockTurn.toFixed(1), sub: 'turns per year', cls: '' },
+      { label: 'Titles GMROII < 1', value: lowGmroii, sub: 'underperforming', cls: lowGmroii > 0 ? 'negative' : 'positive' }
+    ].map(c => `
+      <div class="summary-card ${c.cls}">
+        <div class="s-label">${c.label}</div>
+        <div class="s-value">${c.value}</div>
+        <div class="s-sub">${c.sub}</div>
+      </div>
+    `).join('');
+  }
+
+  // ========== TABLE COLUMNS ==========
+  const columns = [
+    { key: 'isbn',         label: 'ISBN',            fmt: r => r.isbn },
+    { key: 'title',        label: 'Title',           fmt: r => r.title || '\u2014' },
+    { key: 'purchasePrice',label: 'Purchase $',      fmt: r => '$' + r.purchasePrice.toFixed(2), val: r => r.purchasePrice },
+    { key: 'salePrice',    label: 'Sale $',          fmt: r => '$' + r.salePrice.toFixed(2), val: r => r.salePrice },
+    { key: 'discount',     label: 'Discount %',      fmt: r => (r.discount * 100).toFixed(1) + '%', val: r => r.discount },
+    { key: 'salesPerWeek', label: 'Sales/Wk',        fmt: r => r.salesPerWeek.toFixed(2), val: r => r.salesPerWeek },
+    { key: 'currentStock', label: 'Stock',            fmt: r => r.currentStock, val: r => r.currentStock },
+    { key: 'orderQty',     label: 'Order Qty',        fmt: r => r.optimal.orderQty, val: r => r.optimal.orderQty },
+    { key: 'stockTurn',    label: 'Stock Turn',       fmt: r => r.metrics.stockTurn.toFixed(1), val: r => r.metrics.stockTurn },
+    { key: 'gmroii',       label: 'GMROII',           fmt: r => r.metrics.gmroii.toFixed(2), val: r => r.metrics.gmroii },
+    { key: 'annualMargin', label: 'Annual Margin',    fmt: r => '$' + r.metrics.annualGrossMargin.toFixed(0), val: r => r.metrics.annualGrossMargin },
+    { key: 'cashflow',     label: 'Recovery',          fmt: r => {
+      const d = r.metrics.daysToRecover;
+      if (r.metrics.orderCost <= 0) return '<span style="color:var(--muted);">\u2014</span>';
+      const cls = d <= 30 ? 'cashflow-ok' : d <= 60 ? 'cashflow-warn' : 'cashflow-bad';
+      return '<span class="' + cls + '">' + d + 'd</span>';
+    }, val: r => r.metrics.daysToRecover }
+  ];
+
+  function freqLabel(days) {
+    if (days === 7) return 'Weekly';
+    if (days === 14) return 'Biweekly';
+    if (days === 30) return 'Monthly';
+    return 'Every ' + days + 'd';
+  }
+
+  // ========== RENDER TABLE ==========
+  function renderTable() {
+    // Header
+    tableHead.innerHTML = columns.map(c => {
+      const arrow = sortCol === c.key ? (sortAsc ? ' &#9650;' : ' &#9660;') : '';
+      return '<th data-col="' + c.key + '">' + c.label + '<span class="sort-arrow">' + arrow + '</span></th>';
+    }).join('');
+
+    // Sort results
+    const sorted = [...results];
+    const col = columns.find(c => c.key === sortCol);
+    if (col) {
+      sorted.sort((a, b) => {
+        const va = col.val ? col.val(a) : col.fmt(a);
+        const vb = col.val ? col.val(b) : col.fmt(b);
+        if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+        return sortAsc ? va - vb : vb - va;
+      });
+    }
+
+    // Body
+    let html = '';
+    sorted.forEach((r, i) => {
+      const origIdx = results.indexOf(r);
+      const isExpanded = origIdx === expandedIdx;
+      const rowClass = r.metrics.gmroii < 1 ? 'row-red' : r.metrics.gmroii >= 2 ? 'row-green' : '';
+      const expandClass = isExpanded ? ' expanded' : '';
+
+      html += '<tr class="data-row ' + rowClass + expandClass + '" data-idx="' + origIdx + '">';
+      html += columns.map(c => '<td>' + c.fmt(r) + '</td>').join('');
+      html += '</tr>';
+
+      if (isExpanded) {
+        html += '<tr class="detail-row"><td colspan="' + columns.length + '">';
+        html += '<div class="detail-panel" id="detailPanel-' + origIdx + '"></div>';
+        html += '</td></tr>';
+      }
+    });
+    tableBody.innerHTML = html;
+
+    // If expanded, build detail panel
+    if (expandedIdx >= 0) {
+      buildDetailPanel(expandedIdx);
+    }
+  }
+
+  // ========== DETAIL PANEL ==========
+  function buildDetailPanel(idx) {
+    const r = results[idx];
+    const container = document.getElementById('detailPanel-' + idx);
+    if (!container) return;
+
+    // Current overrides
+    let currentQty = r.optimal.orderQty;
+    let currentPaymentDays = 30;
+    const currentFreq = parseInt(globalFreq.value) || 14;
+
+    function getInp(qty, freq) {
+      return {
+        price: r.salePrice,
+        discount: r.discount,
+        stock: r.currentStock,
+        salesPerWeek: r.salesPerWeek,
+        orderQty: qty,
+        reorderDays: freq,
+        paymentDays: currentPaymentDays
+      };
+    }
+
+    function renderDetail() {
+      const inp = getInp(currentQty, currentFreq);
+      const m = calcMetrics(inp);
+
+      const gmroiiClass = m.gmroii >= 2 ? 'positive' : m.gmroii >= 1 ? '' : 'negative';
+
+      container.innerHTML = `
+        <div class="detail-header">
+          <div class="detail-title">${r.isbn}${r.title ? ' &mdash; ' + r.title : ''}</div>
+          <div style="font-size:0.8rem;color:var(--muted);">Optimal order qty: ${r.optimal.orderQty} copies (GMROII ${r.optimal.gmroii.toFixed(2)})</div>
+        </div>
+
+        <div class="detail-controls">
+          <div class="field">
+            <label>Order Quantity</label>
+            <div class="slider-group">
+              <input type="range" id="detailSlider-${idx}" min="0" max="100" step="1" value="${currentQty}">
+              <input type="number" id="detailQtyInput-${idx}" min="0" max="200" step="1" value="${currentQty}">
+              <span style="font-size:0.8rem;color:var(--muted)">copies</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Invoice Payment Days</label>
+            <div class="slider-group">
+              <input type="number" id="detailPayDays-${idx}" min="1" max="180" step="1" value="${currentPaymentDays}" style="width:70px;">
+              <span style="font-size:0.8rem;color:var(--muted)">days</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-metrics" id="detailMetrics-${idx}"></div>
+
+        <div class="detail-grid">
+          <div class="card" style="margin-bottom:0;">
+            <h2>Earning Power Decline</h2>
+            <div class="chart-container" id="detailChart-${idx}"></div>
+            <p class="chart-title">Weeks in Store &rarr; Annualized GMROII per Copy</p>
+          </div>
+          <div class="card" style="margin-bottom:0;">
+            <h2>Order Quantity Comparison</h2>
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Order Qty</th>
+                  <th>Avg Inventory</th>
+                  <th>Stock Turn</th>
+                  <th>GMROII</th>
+                  <th>Annual Margin</th>
+                </tr>
+              </thead>
+              <tbody id="detailComparison-${idx}"></tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      // Render sub-components
+      renderDetailMetrics(idx, m);
+      renderDetailChart(idx, inp);
+      renderDetailComparison(idx, inp);
+
+      // Attach control events
+      const slider = document.getElementById('detailSlider-' + idx);
+      const qtyInput = document.getElementById('detailQtyInput-' + idx);
+      const payDaysInput = document.getElementById('detailPayDays-' + idx);
+
+      slider.addEventListener('input', () => {
+        currentQty = parseInt(slider.value);
+        qtyInput.value = currentQty;
+        updateDetailCalcs();
+      });
+
+      qtyInput.addEventListener('input', () => {
+        currentQty = parseInt(qtyInput.value) || 0;
+        slider.value = Math.min(currentQty, 100);
+        updateDetailCalcs();
+      });
+
+      payDaysInput.addEventListener('input', () => {
+        currentPaymentDays = parseInt(payDaysInput.value) || 30;
+        updateDetailCalcs();
+      });
+    }
+
+    function updateDetailCalcs() {
+      const inp = getInp(currentQty, currentFreq);
+      const m = calcMetrics(inp);
+      renderDetailMetrics(idx, m);
+      renderDetailChart(idx, inp);
+      renderDetailComparison(idx, inp);
+    }
+
+    renderDetail();
+  }
+
+  function renderDetailMetrics(idx, m) {
+    const el = document.getElementById('detailMetrics-' + idx);
+    if (!el) return;
+    const gmroiiClass = m.gmroii >= 2 ? 'positive' : m.gmroii >= 1 ? '' : 'negative';
+    el.innerHTML = `
+      <div class="metric-card highlight">
+        <div class="metric-label">GMROII</div>
+        <div class="metric-value">${m.gmroii.toFixed(2)}</div>
+        <div class="metric-sub">$ earned per $ invested/yr</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">GMROS (Discount)</div>
+        <div class="metric-value">${(m.gmros * 100).toFixed(1)}%</div>
+        <div class="metric-sub">Margin on sales</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Stock Turn</div>
+        <div class="metric-value">${m.stockTurn.toFixed(1)}</div>
+        <div class="metric-sub">Annual inventory turns</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Cost / Copy</div>
+        <div class="metric-value">$${m.costPerCopy.toFixed(2)}</div>
+        <div class="metric-sub">Margin: $${m.marginPerCopy.toFixed(2)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Margin per $ Invested</div>
+        <div class="metric-value">${m.marginPerDollar.toFixed(3)}</div>
+        <div class="metric-sub">discount / (1 - discount)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Avg Inventory (cost)</div>
+        <div class="metric-value">$${m.avgInvAtCost.toFixed(0)}</div>
+        <div class="metric-sub">${m.avgUnits.toFixed(1)} units on avg</div>
+      </div>
+      <div class="metric-card ${gmroiiClass}">
+        <div class="metric-label">Annual Gross Margin</div>
+        <div class="metric-value">$${m.annualGrossMargin.toFixed(0)}</div>
+        <div class="metric-sub">GMROII &times; avg inv at cost</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Cash Flow</div>
+        <div class="metric-value cashflow-${m.cashflow}" style="font-size:0.9rem;">${m.cashflowText}</div>
+        <div class="metric-sub">Order cost: $${m.orderCost.toFixed(0)}</div>
+      </div>
+    `;
+  }
+
+  function renderDetailChart(idx, inp) {
+    const container = document.getElementById('detailChart-' + idx);
+    if (!container) return;
+
+    const d = inp.discount;
+    const marginPerDollar = d > 0 && d < 1 ? d / (1 - d) : 0;
+    const weeks = [1, 2, 3, 4, 6, 8, 10, 13, 16, 20, 26, 39, 52];
+    const values = weeks.map(w => marginPerDollar * (52 / w));
+    const maxVal = Math.max(...values, 1);
+    const chartAreaHeight = 150;
+
+    const ySteps = 5;
+    let yAxisHtml = '';
+    for (let i = ySteps; i >= 0; i--) {
+      yAxisHtml += '<span>' + ((maxVal / ySteps) * i).toFixed(1) + '</span>';
+    }
+
+    let barsHtml = '<div class="chart-y-axis">' + yAxisHtml + '</div>';
+    weeks.forEach((w, i) => {
+      const v = values[i];
+      const h = maxVal > 0 ? (v / maxVal) * chartAreaHeight : 0;
+      const hue = Math.max(0, 120 - (w / 52) * 120);
+      const color = 'hsl(' + hue + ', 70%, 45%)';
+      barsHtml += '<div class="bar-wrapper">' +
+        '<div class="bar" style="height:' + h + 'px; background:' + color + ';">' +
+        '<div class="bar-value" style="color:' + color + ';">' + v.toFixed(1) + '</div>' +
+        '</div>' +
+        '<div class="bar-label">Wk ' + w + '</div>' +
+        '</div>';
+    });
+
+    container.innerHTML = barsHtml;
+  }
+
+  function renderDetailComparison(idx, inp) {
+    const tbody = document.getElementById('detailComparison-' + idx);
+    if (!tbody) return;
+
+    const qtys = [0, 1, 3, 5, 10, 25, 50];
+    if (!qtys.includes(inp.orderQty)) {
+      qtys.push(inp.orderQty);
+      qtys.sort((a, b) => a - b);
+    }
+
+    let bestGmroii = -Infinity;
+    let bestQty = 0;
+    const rows = qtys.map(q => {
+      const m = calcMetrics(inp, q);
+      if (m.gmroii > bestGmroii && q > 0) { bestGmroii = m.gmroii; bestQty = q; }
+      return { q, m };
+    });
+
+    const m0 = calcMetrics(inp, 0);
+    if (m0.gmroii > bestGmroii && inp.stock > 0) { bestGmroii = m0.gmroii; bestQty = 0; }
+
+    tbody.innerHTML = rows.map(({ q, m }) => {
+      const isCurrent = q === inp.orderQty;
+      const isOptimal = q === bestQty && q !== inp.orderQty;
+      const cls = isCurrent ? 'current' : isOptimal ? 'optimal' : '';
+      const tags = (isCurrent ? '<span class="tag tag-current">current</span>' : '') +
+                   (isOptimal ? '<span class="tag tag-optimal">best</span>' : '') +
+                   (q === bestQty && isCurrent ? '<span class="tag tag-optimal">best</span>' : '');
+      return '<tr class="' + cls + '">' +
+        '<td>' + q + tags + '</td>' +
+        '<td>' + m.avgUnits.toFixed(1) + ' units</td>' +
+        '<td>' + m.stockTurn.toFixed(1) + '</td>' +
+        '<td>' + m.gmroii.toFixed(2) + '</td>' +
+        '<td>$' + m.annualGrossMargin.toFixed(0) + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ========== EVENT HANDLERS ==========
+
+  // Upload zone click
+  uploadZone.addEventListener('click', () => fileInput.click());
+
+  // File input change
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    readFile(file);
+  });
+
+  // Drag and drop
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+  });
+
+  uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('dragover');
+  });
+
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) readFile(file);
+  });
+
+  function readFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = parseCSV(e.target.result);
+        processTitles(data);
+      } catch (err) {
+        statusText.textContent = 'Error: ' + err.message;
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Sample data
+  btnSample.addEventListener('click', () => {
+    processTitles(getSampleData());
+  });
+
+  // Global frequency / lead time change → recalc all
+  globalFreq.addEventListener('change', () => {
+    if (titles.length > 0) recalcAll();
+  });
+  globalLeadTime.addEventListener('input', () => {
+    if (titles.length > 0) recalcAll();
+  });
+
+  // Sort on header click
+  document.addEventListener('click', (e) => {
+    const th = e.target.closest('th[data-col]');
+    if (th) {
+      const col = th.dataset.col;
+      if (sortCol === col) {
+        sortAsc = !sortAsc;
+      } else {
+        sortCol = col;
+        sortAsc = true;
+      }
+      renderTable();
+    }
+  });
+
+  // Row click -> expand/collapse
+  document.addEventListener('click', (e) => {
+    const row = e.target.closest('tr.data-row');
+    if (!row) return;
+    // Ignore if click was on a control inside detail panel
+    if (e.target.closest('.detail-panel')) return;
+
+    const idx = parseInt(row.dataset.idx);
+    if (expandedIdx === idx) {
+      expandedIdx = -1;
+    } else {
+      expandedIdx = idx;
+    }
+    renderTable();
+  });
+
+  // Export CSV
+  btnExport.addEventListener('click', () => {
+    if (results.length === 0) return;
+
+    const reorderDays = parseInt(globalFreq.value) || 14;
+    const header = ['ISBN', 'Title', 'Purchase Price', 'Sale Price', 'Discount %', 'Sales/Week', 'Current Stock',
+                     'Optimal Order Qty', 'Reorder Frequency', 'Stock Turn', 'GMROII', 'Annual Gross Margin', 'Cash Flow'];
+    const rows = results.map(r => [
+      r.isbn,
+      '"' + (r.title || '').replace(/"/g, '""') + '"',
+      r.purchasePrice.toFixed(2),
+      r.salePrice.toFixed(2),
+      (r.discount * 100).toFixed(1),
+      r.salesPerWeek.toFixed(2),
+      r.currentStock,
+      r.optimal.orderQty,
+      freqLabel(reorderDays),
+      r.metrics.stockTurn.toFixed(1),
+      r.metrics.gmroii.toFixed(2),
+      r.metrics.annualGrossMargin.toFixed(0),
+      '"' + r.metrics.cashflowText.replace(/"/g, '""') + '"'
+    ]);
+
+    const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'gmroii-results.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // ========== LEXICON ==========
+  const lexiconData = {
+    ro: [
+      ['ISBN', 'International Standard Book Number. Identificator unic al titlului.'],
+      ['Title', 'Numele cărții / titlului din portofoliu.'],
+      ['Purchase Price', 'Prețul de achiziție per exemplar (costul plătit furnizorului).'],
+      ['Sale Price', 'Prețul de vânzare cu amănuntul (retail price).'],
+      ['Discount %', 'Marja procentuală din prețul de vânzare: <code>(Sale Price \u2212 Purchase Price) / Sale Price</code>. Reprezintă câștigul brut per unitate ca procent din preț.'],
+      ['Units Sold', 'Exemplare vândute în perioada de referință (4 săptămâni).'],
+      ['Sales / Week', 'Rata de vânzare săptămânală: <code>Units Sold / 4</code>.'],
+      ['Current Stock', 'Exemplare disponibile în stoc la momentul analizei.'],
+      ['Reorder Frequency', 'Intervalul (în zile) la care plasezi o nouă comandă către furnizor (ex: săptămânal = 7 zile).'],
+      ['Lead Time', 'Timpul (în zile) dintre plasarea comenzii și primirea mărfii. Order Qty acoperă cererea pe <code>Reorder Frequency + Lead Time</code>.'],
+      ['Order Qty (Optimal)', 'Cantitatea optimă de comandat: <code>ceil(Sales/Week \u00d7 (Reorder Freq + Lead Time) / 7)</code>. Acoperă cererea pe un ciclu complet de reaprovizionare.'],
+      ['Avg Inventory (cost)', 'Inventarul mediu evaluat la preț de achiziție: <code>(Current Stock + Order Qty / 2) \u00d7 Purchase Price</code>. Modelează ciclul sawtooth al stocului.'],
+      ['Stock Turn', 'Rotația anuală a stocului: <code>Vânzări anuale la cost / Inventar mediu la cost</code>. Indică de câte ori pe an se „rotește" investiția în inventar.'],
+      ['GMROS', 'Gross Margin Return on Sales. Egal cu Discount % \u2014 marja brută ca procent din vânzări.'],
+      ['Margin per $ Invested', 'Câștig brut per dolar investit în inventar: <code>Discount / (1 \u2212 Discount)</code>. Conectează marja de vânzare cu investiția reală.'],
+      ['GMROII', 'Gross Margin Return on Inventory Investment: <code>Margin per $ Invested \u00d7 Stock Turn</code>. Metrica principală \u2014 câți dolari de marjă brută generează fiecare dolar investit în inventar pe an. GMROII \u2265 2 = performant, < 1 = sub-performant.'],
+      ['Annual Gross Margin', 'Marja brută anuală totală: <code>GMROII \u00d7 Avg Inventory at Cost</code>. Câștigul absolut generat de titlu pe an.'],
+      ['Recovery (Cash Flow)', 'Zilele necesare ca vânzările să acopere costul comenzii. Comparat cu Invoice Payment Days pentru a evalua dacă factura poate fi plătită din încasări.'],
+      ['Invoice Payment Days', 'Termenul de plată al facturii (în zile). Dacă Recovery \u2264 Payment Days, vânzările acoperă factura la timp.'],
+      ['Earning Power Decline', 'GMROII anualizat per exemplar, în funcție de câte săptămâni stă pe raft înainte de vânzare: <code>Margin per $ \u00d7 (52 / Weeks)</code>. Cu cât vânzarea e mai rapidă, cu atât fiecare dolar investit muncește mai mult.']
+    ],
+    en: [
+      ['ISBN', 'International Standard Book Number. Unique identifier for each title.'],
+      ['Title', 'The name of the book / title in the portfolio.'],
+      ['Purchase Price', 'Cost per copy paid to the supplier (wholesale cost).'],
+      ['Sale Price', 'Retail selling price per copy.'],
+      ['Discount %', 'Gross margin as a percentage of the sale price: <code>(Sale Price \u2212 Purchase Price) / Sale Price</code>. Represents gross profit per unit as a share of the retail price.'],
+      ['Units Sold', 'Copies sold during the reference period (4 weeks).'],
+      ['Sales / Week', 'Weekly sell-through rate: <code>Units Sold / 4</code>.'],
+      ['Current Stock', 'Copies currently available on hand at the time of analysis.'],
+      ['Reorder Frequency', 'The interval (in days) at which you place a new order with the supplier (e.g. weekly = 7 days).'],
+      ['Lead Time', 'The number of days between placing an order and receiving the goods. Order Qty covers demand for <code>Reorder Frequency + Lead Time</code>.'],
+      ['Order Qty (Optimal)', 'Optimal order quantity: <code>ceil(Sales/Week \u00d7 (Reorder Freq + Lead Time) / 7)</code>. Covers demand for one full replenishment cycle.'],
+      ['Avg Inventory (cost)', 'Average inventory valued at purchase price: <code>(Current Stock + Order Qty / 2) \u00d7 Purchase Price</code>. Models the sawtooth stock cycle.'],
+      ['Stock Turn', 'Annual inventory turnover: <code>Annual Sales at Cost / Avg Inventory at Cost</code>. How many times per year the inventory investment "turns over".'],
+      ['GMROS', 'Gross Margin Return on Sales. Equals Discount % \u2014 gross margin as a percentage of sales revenue.'],
+      ['Margin per $ Invested', 'Gross profit per dollar invested in inventory: <code>Discount / (1 \u2212 Discount)</code>. Links the sales margin to the actual capital deployed.'],
+      ['GMROII', 'Gross Margin Return on Inventory Investment: <code>Margin per $ Invested \u00d7 Stock Turn</code>. The key metric \u2014 how many dollars of gross margin each dollar invested in inventory generates per year. GMROII \u2265 2 = strong, < 1 = underperforming.'],
+      ['Annual Gross Margin', 'Total annual gross margin: <code>GMROII \u00d7 Avg Inventory at Cost</code>. The absolute profit generated by the title per year.'],
+      ['Recovery (Cash Flow)', 'Days needed for sales revenue to cover the order cost. Compared against Invoice Payment Days to assess whether the invoice can be paid from sales proceeds.'],
+      ['Invoice Payment Days', 'The invoice payment deadline (in days). If Recovery \u2264 Payment Days, sales revenue covers the invoice on time.'],
+      ['Earning Power Decline', 'Annualized GMROII per copy, based on how many weeks it sits on the shelf before selling: <code>Margin per $ \u00d7 (52 / Weeks)</code>. The faster a copy sells, the harder each invested dollar works.']
+    ],
+    de: [
+      ['ISBN', 'International Standard Book Number. Eindeutige Kennung für jeden Titel.'],
+      ['Title', 'Der Name des Buches / Titels im Portfolio.'],
+      ['Purchase Price', 'Einkaufspreis pro Exemplar (an den Lieferanten gezahlter Preis).'],
+      ['Sale Price', 'Verkaufspreis im Einzelhandel pro Exemplar.'],
+      ['Discount %', 'Bruttomarge als Prozentsatz des Verkaufspreises: <code>(Sale Price \u2212 Purchase Price) / Sale Price</code>. Stellt den Bruttogewinn pro Einheit als Anteil am Verkaufspreis dar.'],
+      ['Units Sold', 'Verkaufte Exemplare im Referenzzeitraum (4 Wochen).'],
+      ['Sales / Week', 'Wöchentliche Verkaufsrate: <code>Units Sold / 4</code>.'],
+      ['Current Stock', 'Derzeit verfügbare Exemplare zum Zeitpunkt der Analyse.'],
+      ['Reorder Frequency', 'Das Intervall (in Tagen), in dem eine neue Bestellung beim Lieferanten aufgegeben wird (z.\u00a0B. wöchentlich = 7 Tage).'],
+      ['Lead Time', 'Die Anzahl der Tage zwischen Bestellaufgabe und Wareneingang. Die Bestellmenge deckt die Nachfrage für <code>Reorder Frequency + Lead Time</code> ab.'],
+      ['Order Qty (Optimal)', 'Optimale Bestellmenge: <code>ceil(Sales/Week \u00d7 (Reorder Freq + Lead Time) / 7)</code>. Deckt die Nachfrage für einen vollständigen Nachbestellzyklus.'],
+      ['Avg Inventory (cost)', 'Durchschnittlicher Lagerbestand zum Einkaufspreis: <code>(Current Stock + Order Qty / 2) \u00d7 Purchase Price</code>. Modelliert den Sägezahn-Bestandszyklus.'],
+      ['Stock Turn', 'Jährliche Lagerumschlagshäufigkeit: <code>Jahresumsatz zu Einstandspreisen / Durchschnittlicher Lagerbestand zu Einstandspreisen</code>. Gibt an, wie oft pro Jahr sich die Lagerinvestition „dreht".'],
+      ['GMROS', 'Gross Margin Return on Sales. Entspricht dem Discount % \u2014 Bruttomarge als Prozentsatz des Umsatzes.'],
+      ['Margin per $ Invested', 'Bruttogewinn pro investiertem Dollar: <code>Discount / (1 \u2212 Discount)</code>. Verbindet die Verkaufsmarge mit dem tatsächlich eingesetzten Kapital.'],
+      ['GMROII', 'Gross Margin Return on Inventory Investment: <code>Margin per $ Invested \u00d7 Stock Turn</code>. Die zentrale Kennzahl \u2014 wie viel Dollar Bruttomarge jeder in den Lagerbestand investierte Dollar pro Jahr erwirtschaftet. GMROII \u2265 2 = stark, < 1 = unterdurchschnittlich.'],
+      ['Annual Gross Margin', 'Gesamte jährliche Bruttomarge: <code>GMROII \u00d7 Avg Inventory at Cost</code>. Der absolute Gewinn, den der Titel pro Jahr generiert.'],
+      ['Recovery (Cash Flow)', 'Tage, die benötigt werden, damit die Verkaufserlöse die Bestellkosten decken. Wird mit den Invoice Payment Days verglichen, um zu beurteilen, ob die Rechnung aus den Erlösen bezahlt werden kann.'],
+      ['Invoice Payment Days', 'Die Zahlungsfrist der Rechnung (in Tagen). Wenn Recovery \u2264 Payment Days, decken die Verkaufserlöse die Rechnung rechtzeitig.'],
+      ['Earning Power Decline', 'Annualisierter GMROII pro Exemplar, abhängig davon, wie viele Wochen es im Regal steht, bevor es verkauft wird: <code>Margin per $ \u00d7 (52 / Weeks)</code>. Je schneller ein Exemplar verkauft wird, desto härter arbeitet jeder investierte Dollar.']
+    ],
+    fr: [
+      ['ISBN', 'International Standard Book Number. Identifiant unique pour chaque titre.'],
+      ['Title', 'Le nom du livre / titre dans le portefeuille.'],
+      ['Purchase Price', 'Prix d\u2019achat par exemplaire (coût payé au fournisseur).'],
+      ['Sale Price', 'Prix de vente au détail par exemplaire.'],
+      ['Discount %', 'Marge brute en pourcentage du prix de vente\u00a0: <code>(Sale Price \u2212 Purchase Price) / Sale Price</code>. Représente le bénéfice brut par unité en proportion du prix de vente.'],
+      ['Units Sold', 'Exemplaires vendus pendant la période de référence (4 semaines).'],
+      ['Sales / Week', 'Taux de vente hebdomadaire\u00a0: <code>Units Sold / 4</code>.'],
+      ['Current Stock', 'Exemplaires actuellement disponibles en stock au moment de l\u2019analyse.'],
+      ['Reorder Frequency', 'L\u2019intervalle (en jours) auquel vous passez une nouvelle commande auprès du fournisseur (ex.\u00a0: hebdomadaire = 7 jours).'],
+      ['Lead Time', 'Le nombre de jours entre la passation de la commande et la réception des marchandises. La quantité commandée couvre la demande pour <code>Reorder Frequency + Lead Time</code>.'],
+      ['Order Qty (Optimal)', 'Quantité de commande optimale\u00a0: <code>ceil(Sales/Week \u00d7 (Reorder Freq + Lead Time) / 7)</code>. Couvre la demande pour un cycle complet de réapprovisionnement.'],
+      ['Avg Inventory (cost)', 'Stock moyen valorisé au prix d\u2019achat\u00a0: <code>(Current Stock + Order Qty / 2) \u00d7 Purchase Price</code>. Modélise le cycle en dents de scie du stock.'],
+      ['Stock Turn', 'Rotation annuelle du stock\u00a0: <code>Ventes annuelles au coût / Stock moyen au coût</code>. Indique combien de fois par an l\u2019investissement en stock « tourne ».'],
+      ['GMROS', 'Gross Margin Return on Sales. Égal au Discount % \u2014 marge brute en pourcentage du chiffre d\u2019affaires.'],
+      ['Margin per $ Invested', 'Bénéfice brut par dollar investi en stock\u00a0: <code>Discount / (1 \u2212 Discount)</code>. Relie la marge de vente au capital réellement engagé.'],
+      ['GMROII', 'Gross Margin Return on Inventory Investment\u00a0: <code>Margin per $ Invested \u00d7 Stock Turn</code>. L\u2019indicateur clé \u2014 combien de dollars de marge brute chaque dollar investi en stock génère par an. GMROII \u2265 2 = performant, < 1 = sous-performant.'],
+      ['Annual Gross Margin', 'Marge brute annuelle totale\u00a0: <code>GMROII \u00d7 Avg Inventory at Cost</code>. Le profit absolu généré par le titre sur un an.'],
+      ['Recovery (Cash Flow)', 'Jours nécessaires pour que le chiffre d\u2019affaires couvre le coût de la commande. Comparé aux Invoice Payment Days pour évaluer si la facture peut être payée grâce aux recettes.'],
+      ['Invoice Payment Days', 'Le délai de paiement de la facture (en jours). Si Recovery \u2264 Payment Days, les recettes couvrent la facture dans les temps.'],
+      ['Earning Power Decline', 'GMROII annualisé par exemplaire, en fonction du nombre de semaines passées en rayon avant la vente\u00a0: <code>Margin per $ \u00d7 (52 / Weeks)</code>. Plus la vente est rapide, plus chaque dollar investi travaille efficacement.']
+    ]
+  };
+
+  const lexiconLang = document.getElementById('lexiconLang');
+  const lexiconContent = document.getElementById('lexiconContent');
+
+  function renderLexicon() {
+    const lang = lexiconLang.value;
+    const entries = lexiconData[lang] || lexiconData.ro;
+    lexiconContent.innerHTML = entries.map(([term, def]) =>
+      '<div><strong>' + term + '</strong> \u2014 ' + def + '</div>'
+    ).join('');
+  }
+
+  lexiconLang.addEventListener('change', renderLexicon);
+  renderLexicon();
+
+})();
+</script>
+</body>
+</html>
