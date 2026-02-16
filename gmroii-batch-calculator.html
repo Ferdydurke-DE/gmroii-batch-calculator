@@ -1037,6 +1037,12 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     const tbody = document.getElementById('detailComparison-' + idx);
     if (!tbody) return;
 
+    const reorderDays = parseInt(globalFreq.value) || 14;
+    const leadTimeDays = parseInt(globalLeadTime.value) || 0;
+    const coverageDays = reorderDays + leadTimeDays;
+    const coverageWeeks = coverageDays / 7;
+    const minCoverageQty = Math.max(1, Math.ceil(inp.salesPerWeek * coverageWeeks));
+
     const qtys = [0, 1, 3, 5, 10, 25, 50];
     if (!qtys.includes(inp.orderQty)) {
       qtys.push(inp.orderQty);
@@ -1047,12 +1053,13 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     let bestQty = 0;
     const rows = qtys.map(q => {
       const m = calcMetrics(inp, q);
-      if (m.gmroii > bestGmroii && q > 0) { bestGmroii = m.gmroii; bestQty = q; }
+      const coversStock = (q + inp.stock) >= minCoverageQty;
+      if (m.gmroii > bestGmroii && q > 0 && coversStock) { bestGmroii = m.gmroii; bestQty = q; }
       return { q, m };
     });
 
     const m0 = calcMetrics(inp, 0);
-    if (m0.gmroii > bestGmroii && inp.stock > 0) { bestGmroii = m0.gmroii; bestQty = 0; }
+    if (m0.gmroii > bestGmroii && inp.stock >= minCoverageQty) { bestGmroii = m0.gmroii; bestQty = 0; }
 
     tbody.innerHTML = rows.map(({ q, m }) => {
       const isCurrent = q === inp.orderQty;
