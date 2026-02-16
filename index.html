@@ -560,7 +560,7 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
   const tableHead = document.getElementById('tableHead');
   const tableBody = document.getElementById('tableBody');
 
-  // ========== CORE CALCULATIONS (from gmroii-calculator.html) ==========
+  // ========== CORE CALCULATIONS (aligned with gmroii-calculator.html) ==========
   function calcMetrics(inp, overrideOrderQty) {
     const qty = overrideOrderQty !== undefined ? overrideOrderQty : inp.orderQty;
     const d = inp.discount;
@@ -570,32 +570,46 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     const marginPerDollar = d > 0 && d < 1 ? d / (1 - d) : 0;
     const gmros = d;
 
-    const reorderWeeks = inp.reorderDays / 7;
+    // Coverage must span reorder cycle + lead time
+    const leadTimeDays = inp.leadTimeDays || 0;
+    const coverageDays = inp.reorderDays + leadTimeDays;
+    const coverageWeeks = coverageDays / 7;
+    const demandPerCoverage = inp.salesPerWeek * coverageWeeks;
+
     const avgUnits = inp.stock + qty / 2;
     const avgInvAtCost = avgUnits * costPerCopy;
 
-    const annualSalesUnits = inp.salesPerWeek * 52;
+    // Coverage ratio: supply must cover demand during reorder cycle + lead time
+    const supplyPerCycle = inp.stock + qty;
+    const coverageRatio = demandPerCoverage > 0 ? Math.min(1, supplyPerCycle / demandPerCoverage) : 1;
+    const effectiveSalesPerWeek = inp.salesPerWeek * coverageRatio;
+
+    const annualSalesUnits = effectiveSalesPerWeek * 52;
     const stockTurn = avgInvAtCost > 0 ? (annualSalesUnits * costPerCopy) / avgInvAtCost : 0;
 
     const gmroii = marginPerDollar * stockTurn;
     const annualGrossMargin = avgInvAtCost > 0 ? gmroii * avgInvAtCost : 0;
 
     const paymentDays = inp.paymentDays || 30;
-    const revByDeadline = inp.salesPerWeek * (paymentDays / 7) * p;
+    const revInTerm = inp.salesPerWeek * (paymentDays / 7) * p;
+    const revDouble = inp.salesPerWeek * (paymentDays * 2 / 7) * p;
     const orderCost = qty * costPerCopy;
     const daysToRecover = inp.salesPerWeek > 0 ? (orderCost / (inp.salesPerWeek * p)) * 7 : Infinity;
 
     let cashflow = 'ok';
     let cashflowText = '';
     if (orderCost > 0) {
-      if (revByDeadline >= orderCost) {
+      if (revInTerm >= orderCost) {
         cashflow = 'ok';
         cashflowText = 'Sales cover invoice within ' + paymentDays + ' days';
+      } else if (revDouble >= orderCost) {
+        cashflow = 'warn';
+        cashflowText = 'Sales cover invoice in ' + paymentDays + '\u2013' + (paymentDays * 2) + ' days';
       } else {
         cashflow = 'bad';
         cashflowText = daysToRecover === Infinity
           ? 'No sales to recover cost'
-          : '~' + Math.ceil(daysToRecover) + ' days to recover (deadline: ' + paymentDays + 'd)';
+          : '~' + Math.ceil(daysToRecover) + ' days to recover order cost';
       }
     } else {
       cashflowText = 'No order placed';
@@ -604,23 +618,27 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     return {
       costPerCopy, marginPerCopy, marginPerDollar, gmros,
       avgUnits, avgInvAtCost, stockTurn, gmroii, annualGrossMargin,
-      cashflow, cashflowText, orderCost, daysToRecover: Math.ceil(daysToRecover), paymentDays
+      cashflow, cashflowText, orderCost, daysToRecover: Math.ceil(daysToRecover), paymentDays,
+      coverageRatio, coverageDays, effectiveSalesPerWeek
     };
   }
 
   // ========== FIND OPTIMAL ORDER ==========
-  // qty must cover demand during reorder cycle + lead time
+  // Best order qty = minimum that covers reorder cycle + lead time minus existing stock
+  // This gives full coverage with the best possible GMROII
   function findOptimalOrder(title, reorderDays, leadTimeDays) {
     const coverageDays = reorderDays + leadTimeDays;
     const coverageWeeks = coverageDays / 7;
-    const qty = Math.max(1, Math.ceil(title.salesPerWeek * coverageWeeks));
+    const minCoverageQty = Math.max(0, Math.ceil(title.salesPerWeek * coverageWeeks) - title.currentStock);
+    const qty = Math.max(1, minCoverageQty);
     const inp = {
       price: title.salePrice,
       discount: title.discount,
       stock: title.currentStock,
       salesPerWeek: title.salesPerWeek,
       orderQty: qty,
-      reorderDays: reorderDays
+      reorderDays: reorderDays,
+      leadTimeDays: leadTimeDays
     };
     const m = calcMetrics(inp);
     return { orderQty: qty, reorderDays: reorderDays, gmroii: m.gmroii };
@@ -711,7 +729,8 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
         stock: t.currentStock,
         salesPerWeek: t.salesPerWeek,
         orderQty: optimal.orderQty,
-        reorderDays: optimal.reorderDays
+        reorderDays: optimal.reorderDays,
+        leadTimeDays: leadTimeDays
       };
       const m = calcMetrics(inp);
       return { ...t, optimal, metrics: m };
@@ -843,6 +862,7 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     let currentQty = r.optimal.orderQty;
     let currentPaymentDays = 30;
     const currentFreq = parseInt(globalFreq.value) || 14;
+    const currentLeadTime = parseInt(globalLeadTime.value) || 0;
 
     function getInp(qty, freq) {
       return {
@@ -852,6 +872,7 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
         salesPerWeek: r.salesPerWeek,
         orderQty: qty,
         reorderDays: freq,
+        leadTimeDays: currentLeadTime,
         paymentDays: currentPaymentDays
       };
     }
@@ -900,6 +921,7 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
               <thead>
                 <tr>
                   <th>Order Qty</th>
+                  <th>Coverage</th>
                   <th>Avg Inventory</th>
                   <th>Stock Turn</th>
                   <th>GMROII</th>
@@ -1037,29 +1059,29 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     const tbody = document.getElementById('detailComparison-' + idx);
     if (!tbody) return;
 
-    const reorderDays = parseInt(globalFreq.value) || 14;
-    const leadTimeDays = parseInt(globalLeadTime.value) || 0;
-    const coverageDays = reorderDays + leadTimeDays;
+    const coverageDays = inp.reorderDays + (inp.leadTimeDays || 0);
     const coverageWeeks = coverageDays / 7;
-    const minCoverageQty = Math.max(1, Math.ceil(inp.salesPerWeek * coverageWeeks));
+    const minCoverageQty = Math.max(0, Math.ceil(inp.salesPerWeek * coverageWeeks) - inp.stock);
+
+    // Best = minCoverageQty: exact quantity for full coverage + best GMROII
+    const bestQty = Math.max(1, minCoverageQty);
 
     const qtys = [0, 1, 3, 5, 10, 25, 50];
+    if (minCoverageQty > 0 && !qtys.includes(minCoverageQty)) {
+      qtys.push(minCoverageQty);
+    }
     if (!qtys.includes(inp.orderQty)) {
       qtys.push(inp.orderQty);
-      qtys.sort((a, b) => a - b);
     }
+    qtys.sort((a, b) => a - b);
 
-    let bestGmroii = -Infinity;
-    let bestQty = 0;
     const rows = qtys.map(q => {
       const m = calcMetrics(inp, q);
-      const coversStock = (q + inp.stock) >= minCoverageQty;
-      if (m.gmroii > bestGmroii && q > 0 && coversStock) { bestGmroii = m.gmroii; bestQty = q; }
       return { q, m };
     });
 
-    const m0 = calcMetrics(inp, 0);
-    if (m0.gmroii > bestGmroii && inp.stock >= minCoverageQty) { bestGmroii = m0.gmroii; bestQty = 0; }
+    const bestRow = rows.find(r => r.q === bestQty);
+    const bestGmroii = bestRow ? bestRow.m.gmroii : 0;
 
     tbody.innerHTML = rows.map(({ q, m }) => {
       const isCurrent = q === inp.orderQty;
@@ -1068,8 +1090,12 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
       const tags = (isCurrent ? '<span class="tag tag-current">current</span>' : '') +
                    (isOptimal ? '<span class="tag tag-optimal">best</span>' : '') +
                    (q === bestQty && isCurrent ? '<span class="tag tag-optimal">best</span>' : '');
+      const covCell = m.coverageRatio >= 1
+        ? '<span style="color:var(--green);font-weight:600;">OK</span>'
+        : '<span style="color:var(--red);font-weight:600;">' + Math.round(m.coverageRatio * coverageDays) + '/' + coverageDays + 'd</span>';
       return '<tr class="' + cls + '">' +
         '<td>' + q + tags + '</td>' +
+        '<td>' + covCell + '</td>' +
         '<td>' + m.avgUnits.toFixed(1) + ' units</td>' +
         '<td>' + m.stockTurn.toFixed(1) + '</td>' +
         '<td>' + m.gmroii.toFixed(2) + '</td>' +
