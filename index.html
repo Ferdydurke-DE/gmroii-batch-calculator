@@ -507,8 +507,8 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
   <div style="margin-top:12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
     <label for="lexiconLang" style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;">Language:</label>
     <select id="lexiconLang" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;background:#fff;">
-      <option value="ro" selected>Română</option>
-      <option value="en">English</option>
+      <option value="ro">Română</option>
+      <option value="en" selected>English</option>
       <option value="de">Deutsch</option>
       <option value="fr">Français</option>
     </select>
@@ -1294,7 +1294,7 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
 
   function renderLexicon() {
     const lang = lexiconLang.value;
-    const entries = lexiconData[lang] || lexiconData.ro;
+    const entries = lexiconData[lang] || lexiconData.en;
     lexiconContent.innerHTML = entries.map(([term, def]) =>
       '<div><strong>' + term + '</strong> \u2014 ' + def + '</div>'
     ).join('');
