@@ -576,13 +576,18 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     const coverageWeeks = coverageDays / 7;
     const demandPerCoverage = inp.salesPerWeek * coverageWeeks;
 
-    const avgUnits = inp.stock + qty / 2;
-    const avgInvAtCost = avgUnits * costPerCopy;
-
-    // Coverage ratio: supply must cover demand during reorder cycle + lead time
+    // Coverage ratio FIRST: supply must cover demand during reorder cycle + lead time
     const supplyPerCycle = inp.stock + qty;
     const coverageRatio = demandPerCoverage > 0 ? Math.min(1, supplyPerCycle / demandPerCoverage) : 1;
     const effectiveSalesPerWeek = inp.salesPerWeek * coverageRatio;
+
+    // Average inventory adjusted for coverage
+    // When fully covered: normal sawtooth model (stock + qty/2)
+    // When understocked: stock depletes to 0 mid-cycle, then sits empty for the rest
+    const avgUnits = coverageRatio >= 1
+      ? inp.stock + qty / 2
+      : (supplyPerCycle / 2) * coverageRatio;
+    const avgInvAtCost = avgUnits * costPerCopy;
 
     const annualSalesUnits = effectiveSalesPerWeek * 52;
     const stockTurn = avgInvAtCost > 0 ? (annualSalesUnits * costPerCopy) / avgInvAtCost : 0;
