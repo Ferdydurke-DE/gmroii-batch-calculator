@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ghid de Utilizare — GMROII Batch Calculator</title>
+<title>Usage Guide — GMROII Batch Calculator</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -23,7 +23,6 @@
   --orange-light: #fff7ed;
   --purple: #7c3aed;
   --purple-light: #ede9fe;
-  --step-color: #2563eb;
 }
 
 body {
@@ -43,7 +42,8 @@ body {
 }
 
 .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em; }
-.hero .subtitle { font-size: 1.1rem; opacity: 0.85; max-width: 600px; margin: 0 auto 24px; }
+.hero .subtitle { font-size: 1.1rem; opacity: 0.85; max-width: 600px; margin: 0 auto 4px; }
+.hero .subtitle-en { font-size: 0.95rem; opacity: 0.6; font-style: italic; max-width: 600px; margin: 0 auto 24px; }
 .hero .badge {
   display: inline-block;
   background: rgba(255,255,255,0.2);
@@ -54,8 +54,11 @@ body {
   font-weight: 600;
 }
 
-/* Container */
 .container { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+/* Bilingual helper */
+.en { color: var(--muted); font-style: italic; margin-top: 4px; }
+.callout .en, .tip-box .en { font-style: italic; margin-top: 6px; display: block; }
 
 /* TOC */
 .toc {
@@ -80,35 +83,22 @@ body {
 .toc ol li { margin-bottom: 6px; font-size: 0.95rem; }
 .toc ol li a { color: var(--accent); text-decoration: none; font-weight: 500; }
 .toc ol li a:hover { text-decoration: underline; }
+.toc ol li .toc-en { color: var(--muted); font-style: italic; font-size: 0.85rem; }
 
 /* Step Section */
-.step-section {
-  margin-bottom: 56px;
-  scroll-margin-top: 24px;
-}
+.step-section { margin-bottom: 56px; scroll-margin-top: 24px; }
 
-.step-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
-}
+.step-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
 
 .step-number {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 800;
-  flex-shrink: 0;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; font-weight: 800; flex-shrink: 0;
 }
 
 .step-header h2 { font-size: 1.3rem; font-weight: 700; }
+.step-header .h2-en { font-size: 1rem; color: var(--muted); font-style: italic; font-weight: 400; margin-left: 8px; }
 .step-description { color: var(--muted); font-size: 0.95rem; margin-bottom: 20px; padding-left: 54px; }
 
 /* Mockup container */
@@ -126,21 +116,17 @@ body {
   background: #f1f3f7;
   border-bottom: 1px solid var(--border);
   padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: flex; align-items: center; gap: 6px;
 }
 
-.mockup-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-}
+.mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
 .mockup-dot.r { background: #ff5f57; }
 .mockup-dot.y { background: #ffbd2e; }
 .mockup-dot.g { background: #28c840; }
 
 .mockup-body { padding: 20px 24px; position: relative; }
 
-/* Annotation callouts */
+/* Callouts */
 .callout {
   position: relative;
   border-left: 3px solid var(--accent);
@@ -154,23 +140,15 @@ body {
 .callout.green { border-color: var(--green); background: var(--green-light); }
 .callout.orange { border-color: var(--orange); background: var(--orange-light); }
 .callout.purple { border-color: var(--purple); background: var(--purple-light); }
-
 .callout strong { font-weight: 700; }
 
-/* Annotation numbered markers on mockups */
+/* Markers */
 .marker {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 800;
-  position: absolute;
-  z-index: 5;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-size: 0.75rem; font-weight: 800;
+  position: absolute; z-index: 5;
   box-shadow: 0 2px 6px rgba(37,99,235,0.4);
   animation: pulse 2s infinite;
 }
@@ -180,73 +158,44 @@ body {
   50% { box-shadow: 0 2px 12px rgba(37,99,235,0.7); }
 }
 
-/* Inline mockup elements */
+/* Mock elements */
 .mock-upload {
-  border: 2px dashed #c5d1e0;
-  border-radius: 8px;
-  padding: 30px 20px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  border: 2px dashed #c5d1e0; border-radius: 8px;
+  padding: 30px 20px; text-align: center;
+  color: var(--muted); font-size: 0.9rem; transition: all 0.2s;
 }
 .mock-upload:hover { border-color: var(--accent); background: #f0f5ff; }
 .mock-upload .icon { font-size: 2rem; margin-bottom: 6px; }
 
 .mock-btn {
-  display: inline-block;
-  padding: 7px 14px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  background: var(--card);
-  color: var(--text);
-  cursor: default;
+  display: inline-block; padding: 7px 14px;
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 0.82rem; font-weight: 500;
+  background: var(--card); color: var(--text); cursor: default;
 }
 .mock-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 .mock-select {
-  display: inline-block;
-  padding: 5px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.82rem;
-  background: #fff;
+  display: inline-block; padding: 5px 10px;
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 0.82rem; background: #fff;
 }
 
 .mock-input {
-  display: inline-block;
-  padding: 5px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.82rem;
-  width: 50px;
-  text-align: center;
-  background: #fff;
+  display: inline-block; padding: 5px 8px;
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 0.82rem; width: 50px; text-align: center; background: #fff;
 }
 
 .mock-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  font-weight: 600;
+  font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--muted); font-weight: 600;
 }
 
 /* Summary cards mock */
-.mock-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 8px;
-}
+.mock-summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
 
-.mock-summary-card {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  background: #fff;
-}
+.mock-summary-card { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; background: #fff; }
 .mock-summary-card .label { font-size: 0.6rem; text-transform: uppercase; color: var(--muted); font-weight: 600; letter-spacing: 0.04em; }
 .mock-summary-card .value { font-size: 1.2rem; font-weight: 800; margin-top: 2px; }
 .mock-summary-card .sub { font-size: 0.65rem; color: var(--muted); }
@@ -258,20 +207,12 @@ body {
 .mock-summary-card.clickable::after { content: "click"; position: absolute; top: 4px; right: 6px; font-size: 0.55rem; color: var(--accent); font-weight: 600; text-transform: uppercase; }
 
 /* Mock table */
-.mock-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.78rem;
-}
+.mock-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
 .mock-table th {
-  text-align: left;
-  padding: 8px 10px;
+  text-align: left; padding: 8px 10px;
   border-bottom: 2px solid var(--border);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  font-weight: 600;
+  font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--muted); font-weight: 600;
 }
 .mock-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
 .mock-table .row-red { background: #fff5f5; }
@@ -281,96 +222,45 @@ body {
 .mock-table .cashflow-bad { color: var(--red); font-weight: 600; }
 .mock-table tfoot td { font-weight: 700; border-top: 2px solid var(--border); background: #f8f9fb; }
 
-/* Expanded detail mock */
-.mock-detail {
-  background: #fafbfd;
-  border: 2px solid var(--accent);
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 12px;
-}
+/* Detail mock */
+.mock-detail { background: #fafbfd; border: 2px solid var(--accent); border-radius: 8px; padding: 16px; margin-top: 12px; }
 
-.mock-metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 8px;
-  margin-bottom: 16px;
-}
+.mock-metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-bottom: 16px; }
 
-.mock-metric-card {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px;
-  background: #fff;
-}
+.mock-metric-card { border: 1px solid var(--border); border-radius: 8px; padding: 10px; background: #fff; }
 .mock-metric-card .label { font-size: 0.6rem; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .mock-metric-card .value { font-size: 1.1rem; font-weight: 800; margin-top: 2px; }
 .mock-metric-card.highlight { border-color: var(--accent); background: linear-gradient(135deg, var(--accent-light), #fff); }
 .mock-metric-card.highlight .value { color: var(--accent); }
 
-/* Mock chart bars */
-.mock-chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 100px;
-  padding-top: 10px;
-}
-
-.mock-bar-wrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-  justify-content: flex-end;
-}
-
-.mock-bar {
-  width: 70%;
-  border-radius: 3px 3px 0 0;
-  min-height: 3px;
-}
-
+/* Mock chart */
+.mock-chart { display: flex; align-items: flex-end; gap: 4px; height: 100px; padding-top: 10px; }
+.mock-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+.mock-bar { width: 70%; border-radius: 3px 3px 0 0; min-height: 3px; }
 .mock-bar-label { font-size: 0.55rem; color: var(--muted); margin-top: 3px; }
 
-/* Legend box */
+/* Legend */
 .legend-box {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 12px 0;
-  padding: 10px 14px;
-  background: #f8f9fb;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  font-size: 0.82rem;
+  display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0;
+  padding: 10px 14px; background: #f8f9fb; border-radius: 8px;
+  border: 1px solid var(--border); font-size: 0.82rem;
 }
-
 .legend-item { display: flex; align-items: center; gap: 6px; }
 .legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
 
 /* Tip box */
 .tip-box {
-  background: #fffbeb;
-  border: 1px solid #fbbf24;
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 0.88rem;
-  margin: 16px 0;
+  background: #fffbeb; border: 1px solid #fbbf24;
+  border-radius: 8px; padding: 12px 16px;
+  font-size: 0.88rem; margin: 16px 0;
 }
 .tip-box::before { content: "💡 "; }
 
 /* CSV code */
 .csv-block {
-  background: #1e293b;
-  color: #e2e8f0;
-  border-radius: 8px;
-  padding: 14px 18px;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  font-size: 0.82rem;
-  overflow-x: auto;
-  line-height: 1.7;
+  background: #1e293b; color: #e2e8f0; border-radius: 8px;
+  padding: 14px 18px; font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.82rem; overflow-x: auto; line-height: 1.7;
 }
 .csv-block .header-line { color: #93c5fd; font-weight: 600; }
 .csv-block .data-line { color: #d1d5db; }
@@ -379,10 +269,8 @@ body {
 
 /* Footer */
 .guide-footer {
-  text-align: center;
-  padding: 40px 24px;
-  color: var(--muted);
-  font-size: 0.85rem;
+  text-align: center; padding: 40px 24px;
+  color: var(--muted); font-size: 0.85rem;
   border-top: 1px solid var(--border);
 }
 
@@ -398,8 +286,9 @@ body {
 
 <!-- HERO -->
 <div class="hero">
-  <h1>Ghid de Utilizare</h1>
+  <h1>Usage Guide</h1>
   <p class="subtitle">GMROII Batch Calculator &mdash; Analiza portofoliului de titluri pas cu pas</p>
+  <p class="subtitle-en">Step-by-step portfolio analysis guide</p>
   <div class="badge">Single-file HTML app</div>
 </div>
 
@@ -407,39 +296,42 @@ body {
 
 <!-- TABLE OF CONTENTS -->
 <nav class="toc">
-  <h2>Cuprins</h2>
+  <h2>Cuprins / Contents</h2>
   <ol>
-    <li><a href="#step1">Pregătirea fișierului CSV</a></li>
-    <li><a href="#step2">Încărcarea datelor</a></li>
-    <li><a href="#step3">Setările globale</a></li>
-    <li><a href="#step4">Rezumatul portofoliului (Portfolio Summary)</a></li>
-    <li><a href="#step5">Tabelul de analiză (Title Analysis)</a></li>
-    <li><a href="#step6">Panoul de detalii per titlu</a></li>
-    <li><a href="#step7">Exportul rezultatelor</a></li>
-    <li><a href="#step8">Lexiconul termenilor</a></li>
-    <li><a href="#step9">Interpretarea GMROII</a></li>
+    <li><a href="#step1">Pregătirea fișierului CSV</a> <span class="toc-en">&mdash; Preparing the CSV file</span></li>
+    <li><a href="#step2">Încărcarea datelor</a> <span class="toc-en">&mdash; Loading data</span></li>
+    <li><a href="#step3">Setările globale</a> <span class="toc-en">&mdash; Global settings</span></li>
+    <li><a href="#step4">Rezumatul portofoliului</a> <span class="toc-en">&mdash; Portfolio Summary</span></li>
+    <li><a href="#step5">Tabelul de analiză</a> <span class="toc-en">&mdash; Title Analysis table</span></li>
+    <li><a href="#step6">Panoul de detalii per titlu</a> <span class="toc-en">&mdash; Per-title detail panel</span></li>
+    <li><a href="#step7">Exportul rezultatelor</a> <span class="toc-en">&mdash; Exporting results</span></li>
+    <li><a href="#step8">Lexiconul termenilor</a> <span class="toc-en">&mdash; Term lexicon</span></li>
+    <li><a href="#step9">Interpretarea GMROII</a> <span class="toc-en">&mdash; Interpreting GMROII</span></li>
   </ol>
 </nav>
 
 <!-- ============================================================ -->
-<!-- STEP 1: CSV PREPARATION -->
+<!-- STEP 1 -->
 <!-- ============================================================ -->
 <section class="step-section" id="step1">
   <div class="step-header">
     <div class="step-number">1</div>
-    <h2>Pregătirea fișierului CSV</h2>
+    <h2>Pregătirea fișierului CSV <span class="h2-en">/ Preparing the CSV file</span></h2>
   </div>
-  <p class="step-description">Înainte de a folosi calculatorul, trebuie să pregătești un fișier CSV cu datele titlurilor din portofoliu. Sunt acceptate două formate.</p>
+  <p class="step-description">
+    Înainte de a folosi calculatorul, pregătește un fișier CSV cu datele titlurilor din portofoliu. Sunt acceptate două formate.<br>
+    <span class="en">Before using the calculator, prepare a CSV file with your portfolio title data. Two formats are accepted.</span>
+  </p>
 
   <div class="mockup-frame">
     <div class="mockup-titlebar">
       <div class="mockup-dot r"></div>
       <div class="mockup-dot y"></div>
       <div class="mockup-dot g"></div>
-      <span style="font-size:0.75rem;color:var(--muted);margin-left:8px;">portofoliu.csv</span>
+      <span style="font-size:0.75rem;color:var(--muted);margin-left:8px;">portfolio.csv</span>
     </div>
     <div class="mockup-body">
-      <p style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Format cu 6 coloane (cu titlu):</p>
+      <p style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">6-column format (with title):</p>
       <div class="csv-block">
         <div class="header-line">ISBN,Title,Purchase Price,Sale Price,Units Sold,Current Stock</div>
         <div class="data-line">978-0-06-112008-4,To Kill a Mockingbird,8.40,14.00,12,4</div>
@@ -447,7 +339,7 @@ body {
         <div class="data-line">978-0-7432-7356-5,The Road,10.80,18.00,3,10</div>
       </div>
 
-      <p style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;margin-top:16px;margin-bottom:8px;">Format cu 5 coloane (fără titlu):</p>
+      <p style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;margin-top:16px;margin-bottom:8px;">5-column format (without title):</p>
       <div class="csv-block">
         <div class="header-line">ISBN,Purchase Price,Sale Price,Units Sold,Current Stock</div>
         <div class="data-line">978-0-06-112008-4,8.40,14.00,12,4</div>
@@ -456,29 +348,33 @@ body {
   </div>
 
   <div class="callout">
-    <strong>Coloane necesare:</strong><br>
-    &bull; <strong>ISBN</strong> &mdash; Cod unic (ISBN, SKU, sau orice identificator)<br>
-    &bull; <strong>Title</strong> &mdash; Numele cărții (opțional; nu trebuie să conțină virgule)<br>
-    &bull; <strong>Purchase Price</strong> &mdash; Prețul de achiziție per exemplar<br>
-    &bull; <strong>Sale Price</strong> &mdash; Prețul de vânzare cu amănuntul<br>
-    &bull; <strong>Units Sold</strong> &mdash; Exemplare vândute în ultimele 4 săptămâni<br>
-    &bull; <strong>Current Stock</strong> &mdash; Exemplare disponibile în stoc acum
+    <strong>Coloane necesare / Required columns:</strong><br>
+    &bull; <strong>ISBN</strong> &mdash; Cod unic (ISBN, SKU, sau orice identificator) / Unique code<br>
+    &bull; <strong>Title</strong> &mdash; Numele cărții (opțional; fără virgule) / Book name (optional; no commas)<br>
+    &bull; <strong>Purchase Price</strong> &mdash; Prețul de achiziție per exemplar / Cost per copy<br>
+    &bull; <strong>Sale Price</strong> &mdash; Prețul de vânzare cu amănuntul / Retail selling price<br>
+    &bull; <strong>Units Sold</strong> &mdash; Exemplare vândute în ultimele 4 săptămâni / Copies sold in last 4 weeks<br>
+    &bull; <strong>Current Stock</strong> &mdash; Exemplare disponibile în stoc acum / Copies currently on hand
   </div>
 
   <div class="callout green">
-    <strong>Sfaturi:</strong> Separatorul poate fi virgulă (<code>,</code>) sau punct și virgulă (<code>;</code>) &mdash; se detectează automat. Header-ul este ignorat automat dacă conține cuvinte ca „ISBN", „Price" sau „Stock". Limita recomandată: <strong>până la 1.000 de titluri</strong>.
+    <strong>Sfaturi / Tips:</strong> Separatorul poate fi virgulă (<code>,</code>) sau punct și virgulă (<code>;</code>) &mdash; se detectează automat. Header-ul este ignorat automat. Limita recomandată: <strong>până la 1.000 de titluri</strong>.
+    <span class="en">The separator can be comma or semicolon &mdash; auto-detected. The header row is skipped automatically. Recommended limit: <strong>up to 1,000 titles</strong>.</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- STEP 2: UPLOAD -->
+<!-- STEP 2 -->
 <!-- ============================================================ -->
 <section class="step-section" id="step2">
   <div class="step-header">
     <div class="step-number">2</div>
-    <h2>Încărcarea datelor</h2>
+    <h2>Încărcarea datelor <span class="h2-en">/ Loading data</span></h2>
   </div>
-  <p class="step-description">Deschide <code>index.html</code> în browser. Ai două opțiuni de încărcare a datelor.</p>
+  <p class="step-description">
+    Deschide <code>index.html</code> în browser. Ai două opțiuni de încărcare a datelor.<br>
+    <span class="en">Open <code>index.html</code> in your browser. You have two options to load data.</span>
+  </p>
 
   <div class="mockup-frame">
     <div class="mockup-titlebar">
@@ -509,21 +405,26 @@ body {
 
   <div class="callout">
     <strong>A &mdash; Drag &amp; Drop sau Click:</strong> Trage fișierul CSV direct pe zona punctată, sau apasă click pentru a deschide file browser-ul. Datele se procesează instant.
+    <span class="en">Drag the CSV file onto the dashed area, or click to open the file browser. Data is processed instantly.</span>
   </div>
   <div class="callout purple">
-    <strong>B &mdash; Load Sample Data:</strong> Nu ai un CSV pregătit? Apasă acest buton pentru a încărca 6 titluri de test (clasice literare). Ideal pentru a te familiariza cu aplicația.
+    <strong>B &mdash; Load Sample Data:</strong> Nu ai un CSV pregătit? Apasă acest buton pentru a încărca 6 titluri de test. Ideal pentru a te familiariza cu aplicația.
+    <span class="en">No CSV ready? Press this button to load 6 sample titles. Ideal for getting familiar with the app.</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- STEP 3: GLOBAL SETTINGS -->
+<!-- STEP 3 -->
 <!-- ============================================================ -->
 <section class="step-section" id="step3">
   <div class="step-header">
     <div class="step-number">3</div>
-    <h2>Setările globale</h2>
+    <h2>Setările globale <span class="h2-en">/ Global settings</span></h2>
   </div>
-  <p class="step-description">Înainte sau după încărcare, ajustează parametrii globali care afectează toate calculele.</p>
+  <p class="step-description">
+    Înainte sau după încărcare, ajustează parametrii globali care afectează toate calculele.<br>
+    <span class="en">Before or after loading, adjust the global parameters that affect all calculations.</span>
+  </p>
 
   <div class="mockup-frame">
     <div class="mockup-titlebar">
@@ -554,29 +455,36 @@ body {
   </div>
 
   <div class="callout">
-    <strong>1 &mdash; Reorder Frequency:</strong> Cât de des comanzi de la furnizor? Opțiuni: Weekly (7 zile), Biweekly (14 zile), Monthly (30 zile). Afectează cantitatea optimă de comandat &mdash; un ciclu mai lung = mai multe exemplare de comandat.
+    <strong>1 &mdash; Reorder Frequency:</strong> Cât de des comanzi de la furnizor? Weekly (7 zile), Biweekly (14 zile), Monthly (30 zile). Un ciclu mai lung = mai multe exemplare de comandat.
+    <span class="en">How often do you order from the supplier? Weekly (7 days), Biweekly (14 days), Monthly (30 days). A longer cycle = more copies to order.</span>
   </div>
   <div class="callout">
-    <strong>2 &mdash; Lead Time:</strong> Câte zile durează livrarea de la furnizor? Comanda optimă acoperă cererea pe <em>Reorder Frequency + Lead Time</em>. Dacă lead time = 7 zile și reorder = biweekly, comanda acoperă 21 de zile de cerere.
+    <strong>2 &mdash; Lead Time:</strong> Câte zile durează livrarea de la furnizor? Comanda optimă acoperă cererea pe <em>Reorder Frequency + Lead Time</em>.
+    <span class="en">How many days until delivery from the supplier? The optimal order covers demand for <em>Reorder Frequency + Lead Time</em>.</span>
   </div>
   <div class="callout">
-    <strong>3 &mdash; Currency:</strong> Selectează moneda (EUR, USD, GBP, RON). Afectează doar afișarea &mdash; calculele rămân identice.
+    <strong>3 &mdash; Currency:</strong> Selectează moneda (EUR, USD, GBP, RON). Afectează doar afișarea.
+    <span class="en">Select currency (EUR, USD, GBP, RON). Affects display only.</span>
   </div>
 
   <div class="tip-box">
     Orice schimbare a acestor setări recalculează <strong>instant</strong> toate titlurile și actualizează tabelul și rezumatul portofoliului.
+    <span class="en">Any change to these settings <strong>instantly</strong> recalculates all titles and updates the table and portfolio summary.</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- STEP 4: PORTFOLIO SUMMARY -->
+<!-- STEP 4 -->
 <!-- ============================================================ -->
 <section class="step-section" id="step4">
   <div class="step-header">
     <div class="step-number">4</div>
-    <h2>Rezumatul portofoliului (Portfolio Summary)</h2>
+    <h2>Rezumatul portofoliului <span class="h2-en">/ Portfolio Summary</span></h2>
   </div>
-  <p class="step-description">După încărcare, apare o bandă de carduri cu indicatorii agregați ai portofoliului.</p>
+  <p class="step-description">
+    După încărcare, apare o bandă de carduri cu indicatorii agregați ai portofoliului.<br>
+    <span class="en">After loading, a row of cards appears with the portfolio's aggregate indicators.</span>
+  </p>
 
   <div class="mockup-frame">
     <div class="mockup-titlebar">
@@ -627,25 +535,31 @@ body {
   </div>
 
   <div class="callout">
-    <strong>Portfolio GMROII</strong> (cardul albastru) &mdash; Indicatorul-cheie. Reprezintă câți euro de marjă brută generează fiecare euro investit în inventar pe an, ponderat cu inventarul fiecărui titlu. Un GMROII &ge; 2 = portofoliu sănătos.
+    <strong>Portfolio GMROII</strong> (cardul albastru) &mdash; Indicatorul-cheie. Câți euro de marjă brută generează fiecare euro investit în inventar pe an. GMROII &ge; 2 = portofoliu sănătos.
+    <span class="en">The key indicator. How many euros of gross margin each euro invested in inventory generates per year. GMROII &ge; 2 = healthy portfolio.</span>
   </div>
   <div class="callout green">
     <strong>Annual Gross Margin</strong> &mdash; Marja brută anuală totală generată de portofoliu. Verde = GMROII &ge; 1, roșu = sub 1.
+    <span class="en">Total annual gross margin generated by the portfolio. Green = GMROII &ge; 1, red = below 1.</span>
   </div>
   <div class="callout orange">
-    <strong>Titles GMROII &lt; 1</strong> (cardul roșu, clickabil) &mdash; Câte titluri sunt sub-performante. <strong>Click pe acest card</strong> pentru a filtra tabelul și a vedea doar titlurile cu probleme. Click din nou pentru a anula filtrul.
+    <strong>Titles GMROII &lt; 1</strong> (cardul roșu, clickabil) &mdash; Câte titluri sunt sub-performante. <strong>Click pe acest card</strong> pentru a filtra tabelul și a vedea doar titlurile cu probleme.
+    <span class="en">How many titles are underperforming. <strong>Click this card</strong> to filter the table and see only problematic titles. Click again to clear the filter.</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- STEP 5: TABLE -->
+<!-- STEP 5 -->
 <!-- ============================================================ -->
 <section class="step-section" id="step5">
   <div class="step-header">
     <div class="step-number">5</div>
-    <h2>Tabelul de analiză (Title Analysis)</h2>
+    <h2>Tabelul de analiză <span class="h2-en">/ Title Analysis table</span></h2>
   </div>
-  <p class="step-description">Tabelul principal arată fiecare titlu cu toți indicatorii calculați. Poți căuta, sorta, și filtra.</p>
+  <p class="step-description">
+    Tabelul principal arată fiecare titlu cu toți indicatorii calculați. Poți căuta, sorta, și filtra.<br>
+    <span class="en">The main table shows each title with all calculated indicators. You can search, sort, and filter.</span>
+  </p>
 
   <div class="mockup-frame">
     <div class="mockup-titlebar">
@@ -665,78 +579,32 @@ body {
         <table class="mock-table">
           <thead>
             <tr>
-              <th>ISBN ▲</th>
-              <th>Title</th>
-              <th>Purchase</th>
-              <th>Sale</th>
-              <th>Discount %</th>
-              <th>Sales/Wk</th>
-              <th>Stock</th>
-              <th>Order Qty</th>
-              <th>Stock Turn</th>
-              <th>GMROII</th>
-              <th>Ann. Margin</th>
-              <th>Recovery</th>
+              <th>ISBN ▲</th><th>Title</th><th>Purchase</th><th>Sale</th><th>Discount %</th>
+              <th>Sales/Wk</th><th>Stock</th><th>Order Qty</th><th>Stock Turn</th>
+              <th>GMROII</th><th>Ann. Margin</th><th>Recovery</th>
             </tr>
           </thead>
           <tbody>
-            <tr class="row-green" style="position:relative;">
-              <td>978-0-316-76948-0</td>
-              <td>The Catcher in the Rye</td>
-              <td>€9.60</td>
-              <td>€16.00</td>
-              <td>40.0%</td>
-              <td>5.00</td>
-              <td>3</td>
-              <td>12</td>
-              <td>14.1</td>
-              <td style="color:var(--green);font-weight:700;">9.37</td>
-              <td>€861</td>
-              <td class="cashflow-ok">7d</td>
+            <tr class="row-green">
+              <td>978-0-316-76948-0</td><td>The Catcher in the Rye</td>
+              <td>€9.60</td><td>€16.00</td><td>40.0%</td><td>5.00</td><td>3</td><td>12</td><td>14.1</td>
+              <td style="color:var(--green);font-weight:700;">9.37</td><td>€861</td><td class="cashflow-ok">7d</td>
             </tr>
             <tr>
-              <td>978-0-06-112008-4</td>
-              <td>To Kill a Mockingbird</td>
-              <td>€8.40</td>
-              <td>€14.00</td>
-              <td>40.0%</td>
-              <td>3.00</td>
-              <td>4</td>
-              <td>5</td>
-              <td>6.5</td>
-              <td>4.35</td>
-              <td>€282</td>
-              <td class="cashflow-ok">10d</td>
+              <td>978-0-06-112008-4</td><td>To Kill a Mockingbird</td>
+              <td>€8.40</td><td>€14.00</td><td>40.0%</td><td>3.00</td><td>4</td><td>5</td><td>6.5</td>
+              <td>4.35</td><td>€282</td><td class="cashflow-ok">10d</td>
             </tr>
             <tr class="row-red">
-              <td>978-0-452-28423-4</td>
-              <td>1984</td>
-              <td>€7.20</td>
-              <td>€12.00</td>
-              <td>40.0%</td>
-              <td>0.25</td>
-              <td>6</td>
-              <td>1</td>
-              <td>0.6</td>
-              <td style="color:var(--red);font-weight:700;">0.39</td>
-              <td>€19</td>
-              <td class="cashflow-bad">41d</td>
+              <td>978-0-452-28423-4</td><td>1984</td>
+              <td>€7.20</td><td>€12.00</td><td>40.0%</td><td>0.25</td><td>6</td><td>1</td><td>0.6</td>
+              <td style="color:var(--red);font-weight:700;">0.39</td><td>€19</td><td class="cashflow-bad">41d</td>
             </tr>
           </tbody>
           <tfoot>
             <tr>
-              <td><strong>TOTAL</strong></td>
-              <td>6 titles</td>
-              <td>€360</td>
-              <td>€600</td>
-              <td></td>
-              <td>9.75</td>
-              <td>35</td>
-              <td>28</td>
-              <td></td>
-              <td></td>
-              <td><strong>€953</strong></td>
-              <td></td>
+              <td><strong>TOTAL</strong></td><td>6 titles</td><td>€360</td><td>€600</td><td></td>
+              <td>9.75</td><td>35</td><td>28</td><td></td><td></td><td><strong>€953</strong></td><td></td>
             </tr>
           </tfoot>
         </table>
@@ -745,45 +613,51 @@ body {
   </div>
 
   <div class="legend-box">
-    <div class="legend-item"><div class="legend-swatch" style="background:#f0fdf4;border:1px solid #86efac;"></div> GMROII &ge; 2 (performant)</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#ffffff;border:1px solid var(--border);"></div> GMROII 1&ndash;2 (acceptabil)</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#fff5f5;border:1px solid #fca5a5;"></div> GMROII &lt; 1 (sub-performant)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#f0fdf4;border:1px solid #86efac;"></div> GMROII &ge; 2 (performant / strong)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#ffffff;border:1px solid var(--border);"></div> GMROII 1&ndash;2 (acceptabil / acceptable)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#fff5f5;border:1px solid #fca5a5;"></div> GMROII &lt; 1 (sub-performant / underperforming)</div>
   </div>
 
   <div class="callout">
-    <strong>A &mdash; Căutare:</strong> Scrie un ISBN sau un fragment din titlu. Tabelul se filtrează instant (cu debounce de 200ms).
+    <strong>A &mdash; Căutare / Search:</strong> Scrie un ISBN sau un fragment din titlu. Tabelul se filtrează instant.
+    <span class="en">Type an ISBN or part of a title. The table filters instantly (200ms debounce).</span>
   </div>
   <div class="callout purple">
-    <strong>Sortare:</strong> Click pe orice header de coloană pentru a sorta ascendent. Click din nou pe aceeași coloană pentru a inversa ordinea. Săgeata ▲/▼ indică direcția.
+    <strong>Sortare / Sorting:</strong> Click pe orice header de coloană pentru a sorta. Click din nou pe aceeași coloană pentru a inversa ordinea. ▲/▼ indică direcția.
+    <span class="en">Click any column header to sort ascending. Click again to reverse. ▲/▼ shows direction.</span>
   </div>
   <div class="callout green">
-    <strong>Recovery (Cash Flow):</strong> Indică în câte zile vânzările acoperă costul comenzii. <span class="cashflow-ok">Verde</span> = sub 30 zile, <span class="cashflow-warn" style="color:var(--orange);">Portocaliu</span> = 30&ndash;60 zile, <span class="cashflow-bad" style="color:var(--red);">Roșu</span> = peste 60 zile.
+    <strong>Recovery (Cash Flow):</strong> În câte zile vânzările acoperă costul comenzii. <span style="color:var(--green);font-weight:600;">Verde</span> = sub 30 zile, <span style="color:var(--orange);font-weight:600;">Portocaliu</span> = 30&ndash;60 zile, <span style="color:var(--red);font-weight:600;">Roșu</span> = peste 60 zile.
+    <span class="en">Days for sales to cover order cost. <span style="color:var(--green);">Green</span> = under 30 days, <span style="color:var(--orange);">Orange</span> = 30&ndash;60 days, <span style="color:var(--red);">Red</span> = over 60 days.</span>
   </div>
   <div class="callout orange">
-    <strong>Rândul TOTAL</strong> (footer) &mdash; Arată sumele agregate: stoc total, total order qty, marja anuală totală. Apare mereu jos, sticky.
+    <strong>Rândul TOTAL / TOTAL row</strong> (footer) &mdash; Sumele agregate: stoc total, total order qty, marja anuală totală. Sticky la baza tabelului.
+    <span class="en">Aggregate totals: total stock, total order qty, total annual margin. Sticky at the bottom of the table.</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- STEP 6: DETAIL PANEL -->
+<!-- STEP 6 -->
 <!-- ============================================================ -->
 <section class="step-section" id="step6">
   <div class="step-header">
     <div class="step-number">6</div>
-    <h2>Panoul de detalii per titlu</h2>
+    <h2>Panoul de detalii <span class="h2-en">/ Per-title detail panel</span></h2>
   </div>
-  <p class="step-description">Click pe orice rând din tabel pentru a expanda panoul de detalii. Aici poți ajusta cantitatea de comandat și termenul de plată, vezi metrici detaliate, graficul de „earning power decline" și tabelul comparativ.</p>
+  <p class="step-description">
+    Click pe orice rând din tabel pentru a expanda panoul de detalii. Ajustează cantitatea de comandat, termenul de plată, vezi metrici detaliate, graficul de earning power și tabelul comparativ.<br>
+    <span class="en">Click any table row to expand the detail panel. Adjust order quantity, payment terms, view detailed metrics, the earning power chart, and the comparison table.</span>
+  </p>
 
   <div class="mockup-frame">
     <div class="mockup-titlebar">
       <div class="mockup-dot r"></div>
       <div class="mockup-dot y"></div>
       <div class="mockup-dot g"></div>
-      <span style="font-size:0.75rem;color:var(--muted);margin-left:8px;">Click pe un rând → panou expandat</span>
+      <span style="font-size:0.75rem;color:var(--muted);margin-left:8px;">Click row → expanded panel</span>
     </div>
     <div class="mockup-body">
       <div class="mock-detail">
-        <!-- Header -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <div style="font-weight:700;">978-0-06-112008-4 &mdash; To Kill a Mockingbird</div>
           <div style="font-size:0.78rem;color:var(--muted);">Optimal order qty: 5 copies (GMROII 4.35)</div>
@@ -851,9 +725,8 @@ body {
           <span class="marker" style="top:-10px;right:-10px;">3</span>
         </div>
 
-        <!-- Chart + Comparison side by side -->
+        <!-- Chart + Comparison -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
-          <!-- Chart -->
           <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;position:relative;">
             <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);font-weight:600;margin-bottom:10px;">Earning Power Decline</p>
             <div class="mock-chart">
@@ -865,11 +738,10 @@ body {
               <div class="mock-bar-wrap"><div class="mock-bar" style="height:12px;background:hsl(10,70%,45%);"></div><div class="mock-bar-label">Wk 26</div></div>
               <div class="mock-bar-wrap"><div class="mock-bar" style="height:7px;background:hsl(0,70%,45%);"></div><div class="mock-bar-label">Wk 52</div></div>
             </div>
-            <p style="font-size:0.68rem;color:var(--muted);text-align:center;margin-top:6px;">Weeks in Store → Annualized GMROII per Copy</p>
+            <p style="font-size:0.68rem;color:var(--muted);text-align:center;margin-top:6px;">Weeks in Store &rarr; Annualized GMROII per Copy</p>
             <span class="marker" style="top:6px;right:6px;">4</span>
           </div>
 
-          <!-- Comparison table -->
           <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;position:relative;">
             <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);font-weight:600;margin-bottom:10px;">Order Quantity Comparison</p>
             <table class="mock-table" style="font-size:0.72rem;">
@@ -899,35 +771,44 @@ body {
   </div>
 
   <div class="callout">
-    <strong>1 &mdash; Order Quantity Slider:</strong> Ajustează cantitatea de comandat cu slider-ul sau manual. Toate metricile se recalculează instant. Cantitatea optimă apare în header-ul panoului.
+    <strong>1 &mdash; Order Quantity Slider:</strong> Ajustează cantitatea de comandat cu slider-ul sau manual. Toate metricile se recalculează instant.
+    <span class="en">Adjust the order quantity with the slider or manually. All metrics recalculate instantly.</span>
   </div>
   <div class="callout">
-    <strong>2 &mdash; Invoice Payment Days:</strong> Termenul de plată al facturii. Metrica „Cash Flow" compară acest termen cu zilele necesare pentru recuperarea costului comenzii din vânzări.
+    <strong>2 &mdash; Invoice Payment Days:</strong> Termenul de plată al facturii. Cash Flow compară acest termen cu zilele necesare pentru recuperarea costului comenzii.
+    <span class="en">Invoice payment deadline. Cash Flow compares this against the days needed to recover the order cost from sales.</span>
   </div>
   <div class="callout green">
-    <strong>3 &mdash; Carduri de metrici:</strong> 8 indicatori detaliați: GMROII, GMROS, Stock Turn, Cost/Copy, Margin per € Invested, Avg Inventory, Annual Gross Margin, Cash Flow. Se actualizează la fiecare schimbare a slider-ului.
+    <strong>3 &mdash; Carduri de metrici / Metric cards:</strong> 8 indicatori detaliați: GMROII, GMROS, Stock Turn, Cost/Copy, Margin per € Invested, Avg Inventory, Annual Gross Margin, Cash Flow. Se actualizează la fiecare schimbare a slider-ului.
+    <span class="en">8 detailed indicators. All update live with every slider change.</span>
   </div>
   <div class="callout orange">
-    <strong>4 &mdash; Earning Power Decline:</strong> Grafic cu bare care arată cum scade puterea de câștig a fiecărui exemplar în funcție de câte săptămâni stă pe raft. Cu cât o carte se vinde mai rapid, cu atât fiecare euro investit lucrează mai eficient.
+    <strong>4 &mdash; Earning Power Decline:</strong> Grafic cu bare &mdash; cum scade puterea de câștig a fiecărui exemplar în funcție de câte săptămâni stă pe raft. Cu cât vânzarea e mai rapidă, cu atât fiecare euro investit lucrează mai eficient.
+    <span class="en">Bar chart showing how each copy's earning power declines with weeks on the shelf. The faster it sells, the harder each invested euro works.</span>
   </div>
   <div class="callout purple">
-    <strong>5 &mdash; Order Quantity Comparison:</strong> Tabel comparativ cu diferite cantități de comandat. Arată Coverage (acoperirea ciclului de reaprovizionare), Stock Turn, GMROII și marja anuală pentru fiecare cantitate. Rândul <span style="background:var(--accent-light);padding:1px 6px;border-radius:3px;font-size:0.8rem;">current</span> = cantitatea selectată, <span style="background:var(--green-light);padding:1px 6px;border-radius:3px;font-size:0.8rem;">best</span> = cantitatea optimă.
+    <strong>5 &mdash; Order Quantity Comparison:</strong> Tabel comparativ cu diferite cantități. Coverage, Stock Turn, GMROII și marja anuală. <span style="background:var(--accent-light);padding:1px 6px;border-radius:3px;font-size:0.8rem;">current</span> = cantitatea selectată, <span style="background:var(--green-light);padding:1px 6px;border-radius:3px;font-size:0.8rem;">best</span> = cantitatea optimă.
+    <span class="en">Comparison table with various quantities. Coverage, Stock Turn, GMROII and annual margin. <span style="background:var(--accent-light);padding:1px 6px;border-radius:3px;font-size:0.78rem;">current</span> = selected qty, <span style="background:var(--green-light);padding:1px 6px;border-radius:3px;font-size:0.78rem;">best</span> = optimal qty.</span>
   </div>
 
   <div class="tip-box">
-    <strong>Coverage:</strong> „OK" (verde) = stocul + comanda acoperă întreaga perioadă (reorder freq + lead time). Un indicator roșu ca „15/21d" înseamnă că ai acoperire doar pentru 15 din 21 de zile necesare &mdash; vei rămâne fără stoc!
+    <strong>Coverage:</strong> „OK" (verde) = stocul + comanda acoperă întreaga perioadă. Un indicator roșu ca „15/21d" = ai acoperire doar 15 din 21 de zile &mdash; vei rămâne fără stoc!
+    <span class="en">"OK" (green) = stock + order covers the full period. A red indicator like "15/21d" = you only cover 15 of 21 days &mdash; you'll run out of stock!</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- STEP 7: EXPORT -->
+<!-- STEP 7 -->
 <!-- ============================================================ -->
 <section class="step-section" id="step7">
   <div class="step-header">
     <div class="step-number">7</div>
-    <h2>Exportul rezultatelor</h2>
+    <h2>Exportul rezultatelor <span class="h2-en">/ Exporting results</span></h2>
   </div>
-  <p class="step-description">După ce ai analizat portofoliul, poți exporta toate rezultatele într-un fișier CSV.</p>
+  <p class="step-description">
+    După ce ai analizat portofoliul, poți exporta toate rezultatele într-un fișier CSV.<br>
+    <span class="en">After analyzing your portfolio, you can export all results to a CSV file.</span>
+  </p>
 
   <div class="mockup-frame">
     <div class="mockup-titlebar">
@@ -936,9 +817,9 @@ body {
       <div class="mockup-dot g"></div>
     </div>
     <div class="mockup-body">
-      <div class="flex-row" style="position:relative;">
+      <div class="flex-row">
         <span class="mock-btn primary">Load Sample Data</span>
-        <span class="mock-btn" style="position:relative;border-color:var(--accent);color:var(--accent);">
+        <span class="mock-btn" style="border-color:var(--accent);color:var(--accent);position:relative;">
           Export Results CSV
           <span class="marker" style="top:-12px;right:-12px;">!</span>
         </span>
@@ -947,19 +828,23 @@ body {
   </div>
 
   <div class="callout green">
-    <strong>Export Results CSV:</strong> Butonul devine activ după încărcarea datelor. Generează un fișier <code>gmroii-results.csv</code> cu toate coloanele: ISBN, Title, Purchase Price, Sale Price, Discount %, Sales/Week, Current Stock, Optimal Order Qty, Reorder Frequency, Stock Turn, GMROII, Annual Gross Margin, Cash Flow. Ideal pentru import în Excel sau Google Sheets.
+    <strong>Export Results CSV:</strong> Butonul devine activ după încărcarea datelor. Generează <code>gmroii-results.csv</code> cu toate coloanele: ISBN, Title, Purchase Price, Sale Price, Discount %, Sales/Week, Current Stock, Optimal Order Qty, Reorder Frequency, Stock Turn, GMROII, Annual Gross Margin, Cash Flow. Ideal pentru Excel sau Google Sheets.
+    <span class="en">The button becomes active after loading data. Generates <code>gmroii-results.csv</code> with all columns. Ideal for importing into Excel or Google Sheets.</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- STEP 8: LEXICON -->
+<!-- STEP 8 -->
 <!-- ============================================================ -->
 <section class="step-section" id="step8">
   <div class="step-header">
     <div class="step-number">8</div>
-    <h2>Lexiconul termenilor</h2>
+    <h2>Lexiconul termenilor <span class="h2-en">/ Term lexicon</span></h2>
   </div>
-  <p class="step-description">Secțiunea „Lexicon" (colapsabilă) explică fiecare parametru și indicator în 4 limbi.</p>
+  <p class="step-description">
+    Secțiunea „Lexicon" (colapsabilă) explică fiecare parametru și indicator în 4 limbi.<br>
+    <span class="en">The collapsible "Lexicon" section explains every parameter and indicator in 4 languages.</span>
+  </p>
 
   <div class="mockup-frame">
     <div class="mockup-titlebar">
@@ -980,39 +865,42 @@ body {
           <span class="mock-select" style="margin-left:4px;">Français ▾</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.82rem;">
-          <div><strong>GMROII</strong> &mdash; Gross Margin Return on Inventory Investment: Margin per $ Invested × Stock Turn. Câți dolari de marjă brută generează fiecare dolar investit în inventar pe an.</div>
-          <div><strong>Stock Turn</strong> &mdash; Rotația anuală a stocului: Vânzări anuale la cost / Inventar mediu la cost.</div>
-          <div><strong>Recovery</strong> &mdash; Zilele necesare ca vânzările să acopere costul comenzii.</div>
-          <div><strong>Lead Time</strong> &mdash; Timpul dintre plasarea comenzii și primirea mărfii.</div>
+          <div><strong>GMROII</strong> &mdash; Gross Margin Return on Inventory Investment: Margin per $ Invested × Stock Turn.</div>
+          <div><strong>Stock Turn</strong> &mdash; Annual inventory turnover: Annual Sales at Cost / Avg Inventory at Cost.</div>
+          <div><strong>Recovery</strong> &mdash; Days for sales to cover order cost.</div>
+          <div><strong>Lead Time</strong> &mdash; Days between placing an order and receiving goods.</div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="callout">
-    Click pe <strong>„Lexicon &mdash; Parameter Definitions"</strong> pentru a expanda/colasa. Selectează limba din dropdown: Română, English, Deutsch, Français. Toate cele 19 definiții sunt traduse complet.
+    Click pe <strong>„Lexicon &mdash; Parameter Definitions"</strong> pentru a expanda/colasa. Selectează limba: Română, English, Deutsch, Français. Toate cele 19 definiții sunt traduse complet.
+    <span class="en">Click <strong>"Lexicon &mdash; Parameter Definitions"</strong> to expand/collapse. Select language: Română, English, Deutsch, Français. All 19 definitions are fully translated.</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- STEP 9: INTERPRETING GMROII -->
+<!-- STEP 9 -->
 <!-- ============================================================ -->
 <section class="step-section" id="step9">
   <div class="step-header">
     <div class="step-number">9</div>
-    <h2>Interpretarea GMROII &mdash; Ghid rapid</h2>
+    <h2>Interpretarea GMROII <span class="h2-en">/ Interpreting GMROII</span></h2>
   </div>
-  <p class="step-description">Cum să citești rezultatele și ce acțiuni să iei.</p>
+  <p class="step-description">
+    Cum să citești rezultatele și ce acțiuni să iei.<br>
+    <span class="en">How to read the results and what actions to take.</span>
+  </p>
 
   <div class="mockup-frame">
     <div class="mockup-titlebar">
       <div class="mockup-dot r"></div>
       <div class="mockup-dot y"></div>
       <div class="mockup-dot g"></div>
-      <span style="font-size:0.75rem;color:var(--muted);margin-left:8px;">Scala GMROII</span>
+      <span style="font-size:0.75rem;color:var(--muted);margin-left:8px;">GMROII Scale</span>
     </div>
     <div class="mockup-body">
-      <!-- Visual scale -->
       <div style="display:flex;height:40px;border-radius:8px;overflow:hidden;margin-bottom:16px;font-size:0.75rem;font-weight:700;color:#fff;">
         <div style="flex:1;background:#dc2626;display:flex;align-items:center;justify-content:center;">0 — 0.99</div>
         <div style="flex:1;background:#ea580c;display:flex;align-items:center;justify-content:center;">1.0 — 1.99</div>
@@ -1022,20 +910,24 @@ body {
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:0.85rem;">
         <div style="border:1px solid #fca5a5;background:#fff5f5;border-radius:8px;padding:12px;">
-          <strong style="color:#dc2626;">GMROII &lt; 1 — Sub-performant</strong>
+          <strong style="color:#dc2626;">GMROII &lt; 1 — Sub-performant / Underperforming</strong>
           <p style="margin-top:4px;color:var(--muted);font-size:0.82rem;">Titlul pierde bani raportat la investiția în stoc. Acțiuni: micșorează stocul, mărește discountul, sau renunță la titlu.</p>
+          <p style="margin-top:2px;color:var(--muted);font-size:0.78rem;font-style:italic;">The title loses money relative to the stock investment. Actions: reduce stock, increase discount, or drop the title.</p>
         </div>
         <div style="border:1px solid #fed7aa;background:#fff7ed;border-radius:8px;padding:12px;">
-          <strong style="color:#ea580c;">GMROII 1 — 2 — Acceptabil</strong>
+          <strong style="color:#ea580c;">GMROII 1 — 2 — Acceptabil / Acceptable</strong>
           <p style="margin-top:4px;color:var(--muted);font-size:0.82rem;">Titlul generează profit, dar nu spectaculos. Menține stocul, dar monitorizează tendința vânzărilor.</p>
+          <p style="margin-top:2px;color:var(--muted);font-size:0.78rem;font-style:italic;">The title generates profit, but not spectacular. Maintain stock, but monitor the sales trend.</p>
         </div>
         <div style="border:1px solid #86efac;background:#f0fdf4;border-radius:8px;padding:12px;">
-          <strong style="color:#16a34a;">GMROII 2 — 4 — Bun</strong>
+          <strong style="color:#16a34a;">GMROII 2 — 4 — Bun / Good</strong>
           <p style="margin-top:4px;color:var(--muted);font-size:0.82rem;">Titlul performează bine. Fiecare euro investit generează 2-4 euro de marjă pe an. Menține stocul optim.</p>
+          <p style="margin-top:2px;color:var(--muted);font-size:0.78rem;font-style:italic;">The title performs well. Each euro invested generates 2-4 euros of margin per year. Maintain optimal stock.</p>
         </div>
         <div style="border:1px solid #4ade80;background:#ecfdf5;border-radius:8px;padding:12px;">
-          <strong style="color:#0d6e2d;">GMROII 4+ — Excelent</strong>
+          <strong style="color:#0d6e2d;">GMROII 4+ — Excelent / Excellent</strong>
           <p style="margin-top:4px;color:var(--muted);font-size:0.82rem;">Titlu „star". Poți comanda mai mult dacă cererea o susține. Ia în calcul promovare și vizibilitate.</p>
+          <p style="margin-top:2px;color:var(--muted);font-size:0.78rem;font-style:italic;">A "star" title. You can order more if demand supports it. Consider promotion and visibility.</p>
         </div>
       </div>
     </div>
@@ -1043,22 +935,24 @@ body {
 
   <div class="callout">
     <strong>Formula GMROII:</strong> <code>GMROII = Margin per € Invested × Stock Turn</code><br>
-    Unde: <code>Margin per € = Discount / (1 − Discount)</code> și <code>Stock Turn = Vânzări anuale la cost / Inventar mediu la cost</code>
+    Unde / Where: <code>Margin per € = Discount / (1 − Discount)</code> și / and <code>Stock Turn = Annual Sales at Cost / Avg Inventory at Cost</code>
   </div>
 
   <div class="callout green">
-    <strong>Relația cheie:</strong> GMROII combină <em>cât de profitabilă</em> este vânzarea (marja) cu <em>cât de repede</em> se vinde (rotația). Un titlu cu marjă mică dar vânzare rapidă poate avea GMROII mai bun decât un titlu cu marjă mare dar vânzare lentă.
+    <strong>Relația cheie / Key relationship:</strong> GMROII combină <em>cât de profitabilă</em> este vânzarea (marja) cu <em>cât de repede</em> se vinde (rotația). Un titlu cu marjă mică dar vânzare rapidă poate avea GMROII mai bun decât un titlu cu marjă mare dar vânzare lentă.
+    <span class="en">GMROII combines <em>how profitable</em> the sale is (margin) with <em>how fast</em> it sells (turnover). A title with small margin but fast sales can have a better GMROII than one with high margin but slow sales.</span>
   </div>
 
   <div class="tip-box">
-    <strong>Regula de aur:</strong> GMROII &ge; 2 este pragul minim pentru un portofoliu sănătos de librărie. Sub 1 = fiecare zi în care cartea stă pe raft te costă bani. Folosește filtrul „Titles GMROII &lt; 1" pentru a identifica rapid titlurile problematice.
+    <strong>Regula de aur / Golden rule:</strong> GMROII &ge; 2 este pragul minim pentru un portofoliu sănătos. Sub 1 = fiecare zi în care cartea stă pe raft te costă bani. Folosește filtrul „Titles GMROII &lt; 1" pentru a identifica rapid titlurile problematice.
+    <span class="en">GMROII &ge; 2 is the minimum threshold for a healthy portfolio. Below 1 = every day the book sits on the shelf costs you money. Use the "Titles GMROII &lt; 1" filter to quickly identify problematic titles.</span>
   </div>
 </section>
 
 </div>
 
 <div class="guide-footer">
-  GMROII Batch Calculator &mdash; Ghid de Utilizare
+  GMROII Batch Calculator &mdash; Usage Guide
 </div>
 
 </body>
