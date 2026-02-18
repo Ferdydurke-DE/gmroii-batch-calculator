@@ -258,6 +258,17 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
   border-radius: var(--radius);
   padding: 12px;
   box-shadow: var(--shadow);
+  min-width: 0;
+}
+
+.detail-metrics .metric-card .metric-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 2px;
+  line-height: 1.2;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .detail-metrics .metric-card .metric-label {
@@ -266,13 +277,6 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
   letter-spacing: 0.05em;
   color: var(--muted);
   font-weight: 600;
-}
-
-.detail-metrics .metric-card .metric-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-top: 2px;
-  line-height: 1.2;
 }
 
 .detail-metrics .metric-card .metric-sub {
@@ -1195,7 +1199,7 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
       </div>
       <div class="metric-card">
         <div class="metric-label">Cash Flow</div>
-        <div class="metric-value cashflow-${m.cashflow}" style="font-size:0.9rem;">${m.cashflowText}</div>
+        <div class="metric-value cashflow-${m.cashflow}" style="font-size:0.82rem;line-height:1.4;">${m.cashflowText}</div>
         <div class="metric-sub">Order cost: ${cs()}${fmtN(m.orderCost, 0)}</div>
       </div>
     `;
