@@ -150,6 +150,29 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
 .summary-card.positive .s-value { color: var(--green); }
 .summary-card.negative .s-value { color: var(--red); }
 
+.summary-card.clickable { cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+.summary-card.clickable:hover { border-color: var(--accent); }
+.summary-card.clickable.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+
+.search-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--card);
+  margin-bottom: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+.search-input::placeholder { color: var(--muted); }
+
 /* Summary Table */
 .table-wrapper { overflow-x: auto; max-height: 70vh; overflow-y: auto; }
 
@@ -160,6 +183,14 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
 }
 
 .summary-table thead { position: sticky; top: 0; z-index: 10; }
+.summary-table tfoot { position: sticky; bottom: 0; z-index: 10; }
+.summary-table tfoot td {
+  padding: 10px 12px;
+  border-top: 2px solid var(--border);
+  background: var(--bg);
+  font-weight: 700;
+  font-size: 0.82rem;
+}
 
 .summary-table th {
   text-align: left;
@@ -182,6 +213,13 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
 .summary-table td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.summary-table td:nth-child(2) {
+  white-space: normal;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .summary-table tbody tr.data-row { cursor: pointer; transition: background 0.1s; }
@@ -497,6 +535,15 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
       <input type="number" id="globalLeadTime" min="0" max="90" step="1" value="7" style="width:55px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;text-align:center;">
       <span style="font-size:0.8rem;color:var(--muted);">days</span>
     </div>
+    <div style="display:inline-flex;align-items:center;gap:6px;margin-left:8px;">
+      <label for="globalCurrency" style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;">Currency:</label>
+      <select id="globalCurrency" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;background:#fff;">
+        <option value="EUR" selected>EUR (&euro;)</option>
+        <option value="USD">USD ($)</option>
+        <option value="GBP">GBP (&pound;)</option>
+        <option value="RON">RON (lei)</option>
+      </select>
+    </div>
     <span class="status-text" id="statusText">No data loaded</span>
   </div>
 </div>
@@ -526,12 +573,14 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
   <!-- SUMMARY TABLE -->
   <div class="card">
     <h2>Title Analysis</h2>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search by ISBN or title...">
     <div class="table-wrapper">
       <table class="summary-table">
         <thead>
           <tr id="tableHead"></tr>
         </thead>
         <tbody id="tableBody"></tbody>
+        <tfoot id="tableFoot"></tfoot>
       </table>
     </div>
   </div>
@@ -546,6 +595,9 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
   let sortCol = 'isbn';
   let sortAsc = true;
   let expandedIdx = -1;  // index of currently expanded row
+  let searchQuery = '';
+  let filterLowGmroii = false;
+  let searchDebounceTimer = null;
 
   // ========== DOM REFS ==========
   const uploadZone = document.getElementById('uploadZone');
@@ -559,6 +611,15 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
   const portfolioSummary = document.getElementById('portfolioSummary');
   const tableHead = document.getElementById('tableHead');
   const tableBody = document.getElementById('tableBody');
+  const tableFoot = document.getElementById('tableFoot');
+  const searchInput = document.getElementById('searchInput');
+  const globalCurrency = document.getElementById('globalCurrency');
+
+  const currencySymbols = { EUR: '\u20ac', USD: '$', GBP: '\u00a3', RON: 'lei' };
+  function cs() { return currencySymbols[globalCurrency.value] || '\u20ac'; }
+  function fmtN(n, decimals) {
+    return n.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
 
   // ========== CORE CALCULATIONS (aligned with gmroii-calculator.html) ==========
   function calcMetrics(inp, overrideOrderQty) {
@@ -650,6 +711,39 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
   }
 
   // ========== CSV PARSING ==========
+  // Split a CSV line respecting quoted fields (RFC 4180)
+  function splitCSVLine(line, sep) {
+    const fields = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (i + 1 < line.length && line[i + 1] === '"') {
+            current += '"';
+            i++; // skip escaped quote
+          } else {
+            inQuotes = false;
+          }
+        } else {
+          current += ch;
+        }
+      } else {
+        if (ch === '"') {
+          inQuotes = true;
+        } else if (ch === sep) {
+          fields.push(current.trim());
+          current = '';
+        } else {
+          current += ch;
+        }
+      }
+    }
+    fields.push(current.trim());
+    return fields;
+  }
+
   function parseCSV(text) {
     const lines = text.split(/\r?\n/).filter(l => l.trim());
     if (lines.length < 2) throw new Error('CSV must have a header row and at least one data row.');
@@ -662,12 +756,12 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     const startIdx = (header.includes('isbn') || header.includes('price') || header.includes('stock') || header.includes('title')) ? 1 : 0;
 
     // Detect if Title column is present (6 columns = with title, 5 = without)
-    const sampleParts = lines[startIdx] ? lines[startIdx].split(sep) : [];
+    const sampleParts = splitCSVLine(lines[startIdx] || '', sep);
     const hasTitle = sampleParts.length >= 6;
 
     const parsed = [];
     for (let i = startIdx; i < lines.length; i++) {
-      const parts = lines[i].split(sep).map(s => s.trim());
+      const parts = splitCSVLine(lines[i], sep);
       if (hasTitle && parts.length < 6) continue;
       if (!hasTitle && parts.length < 5) continue;
 
@@ -675,21 +769,22 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
       if (hasTitle) {
         isbn = parts[0];
         title = parts[1];
-        purchasePrice = parseFloat(parts[2]);
-        salePrice = parseFloat(parts[3]);
-        unitsSold = parseFloat(parts[4]);
-        currentStock = parseInt(parts[5]);
+        purchasePrice = parseFloat(parts[2]) || 0;
+        salePrice = parseFloat(parts[3]) || 0;
+        unitsSold = parseFloat(parts[4]) || 0;
+        currentStock = parseInt(parts[5]) || 0;
       } else {
         isbn = parts[0];
         title = '';
-        purchasePrice = parseFloat(parts[1]);
-        salePrice = parseFloat(parts[2]);
-        unitsSold = parseFloat(parts[3]);
-        currentStock = parseInt(parts[4]);
+        purchasePrice = parseFloat(parts[1]) || 0;
+        salePrice = parseFloat(parts[2]) || 0;
+        unitsSold = parseFloat(parts[3]) || 0;
+        currentStock = parseInt(parts[4]) || 0;
       }
 
-      if (isNaN(purchasePrice) || isNaN(salePrice) || isNaN(unitsSold) || isNaN(currentStock)) continue;
-      if (salePrice <= 0) continue;
+      if (isNaN(purchasePrice) || isNaN(salePrice)) continue;
+      if (salePrice <= 0 || purchasePrice <= 0) continue;
+      if (unitsSold <= 0) continue;
 
       const salesPerWeek = unitsSold / 4;
       const discount = (salePrice - purchasePrice) / salePrice;
@@ -720,6 +815,9 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
   // ========== PROCESS TITLES ==========
   function processTitles(data) {
     titles = data;
+    searchQuery = '';
+    filterLowGmroii = false;
+    searchInput.value = '';
     recalcAll();
   }
 
@@ -749,53 +847,86 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     renderTable();
   }
 
+  // ========== FILTERING ==========
+  function getFilteredResults() {
+    let filtered = results;
+    const query = searchQuery.toLowerCase();
+    if (query) {
+      filtered = filtered.filter(r =>
+        r.isbn.toLowerCase().includes(query) ||
+        (r.title && r.title.toLowerCase().includes(query))
+      );
+    }
+    if (filterLowGmroii) {
+      filtered = filtered.filter(r => r.metrics.gmroii < 1);
+    }
+    return filtered;
+  }
+
   // ========== PORTFOLIO SUMMARY ==========
   function renderPortfolio() {
+    const filtered = getFilteredResults();
+    const hasFilters = filtered.length !== results.length;
+
     let totalInvCost = 0;
     let totalAnnualMargin = 0;
-    let totalWeightedGmroii = 0;
     let totalStockTurn = 0;
     let lowGmroii = 0;
 
-    results.forEach(r => {
+    let totalGmros = 0;
+    filtered.forEach(r => {
       totalInvCost += r.metrics.avgInvAtCost;
       totalAnnualMargin += r.metrics.annualGrossMargin;
       totalStockTurn += r.metrics.stockTurn;
+      totalGmros += r.metrics.gmros;
       if (r.metrics.gmroii < 1) lowGmroii++;
     });
 
     const portfolioGmroii = totalInvCost > 0 ? totalAnnualMargin / totalInvCost : 0;
-    const avgStockTurn = results.length > 0 ? totalStockTurn / results.length : 0;
+    const avgStockTurn = filtered.length > 0 ? totalStockTurn / filtered.length : 0;
+    const avgGmros = filtered.length > 0 ? totalGmros / filtered.length : 0;
 
-    portfolioSummary.innerHTML = [
-      { label: 'Total Titles', value: results.length, sub: 'in portfolio', cls: '' },
-      { label: 'Total Inventory (cost)', value: '$' + totalInvCost.toFixed(0), sub: 'average at cost', cls: '' },
+    const titleLabel = hasFilters ? 'Filtered Titles' : 'Total Titles';
+    const titleSub = hasFilters ? filtered.length + ' of ' + results.length : 'in portfolio';
+
+    const cards = [
+      { label: titleLabel, value: filtered.length, sub: titleSub, cls: '' },
+      { label: 'Total Inventory (cost)', value: cs() + fmtN(totalInvCost, 0), sub: 'average at cost', cls: '' },
       { label: 'Portfolio GMROII', value: portfolioGmroii.toFixed(2), sub: 'weighted by inventory', cls: 'highlight' },
-      { label: 'Annual Gross Margin', value: '$' + totalAnnualMargin.toFixed(0), sub: 'all titles combined', cls: portfolioGmroii >= 1 ? 'positive' : 'negative' },
+      { label: 'Annual Gross Margin', value: cs() + fmtN(totalAnnualMargin, 0), sub: hasFilters ? 'filtered titles' : 'all titles combined', cls: portfolioGmroii >= 1 ? 'positive' : 'negative' },
+      { label: 'Avg GMROS', value: (avgGmros * 100).toFixed(1) + '%', sub: 'gross margin on sales', cls: '' },
       { label: 'Avg Stock Turn', value: avgStockTurn.toFixed(1), sub: 'turns per year', cls: '' },
-      { label: 'Titles GMROII < 1', value: lowGmroii, sub: 'underperforming', cls: lowGmroii > 0 ? 'negative' : 'positive' }
-    ].map(c => `
-      <div class="summary-card ${c.cls}">
+      { label: 'Titles GMROII < 1', value: lowGmroii, sub: 'underperforming', cls: (lowGmroii > 0 ? 'negative' : 'positive') + ' clickable' + (filterLowGmroii ? ' active' : ''), id: 'cardLowGmroii' }
+    ];
+
+    portfolioSummary.innerHTML = cards.map(c => `
+      <div class="summary-card ${c.cls}"${c.id ? ' id="' + c.id + '"' : ''}>
         <div class="s-label">${c.label}</div>
         <div class="s-value">${c.value}</div>
         <div class="s-sub">${c.sub}</div>
       </div>
     `).join('');
+
+    document.getElementById('cardLowGmroii').addEventListener('click', () => {
+      filterLowGmroii = !filterLowGmroii;
+      renderPortfolio();
+      renderTable();
+    });
   }
 
   // ========== TABLE COLUMNS ==========
   const columns = [
     { key: 'isbn',         label: 'ISBN',            fmt: r => r.isbn },
     { key: 'title',        label: 'Title',           fmt: r => r.title || '\u2014' },
-    { key: 'purchasePrice',label: 'Purchase $',      fmt: r => '$' + r.purchasePrice.toFixed(2), val: r => r.purchasePrice },
-    { key: 'salePrice',    label: 'Sale $',          fmt: r => '$' + r.salePrice.toFixed(2), val: r => r.salePrice },
+    { key: 'purchasePrice',label: 'Purchase',         fmt: r => cs() + fmtN(r.purchasePrice, 2), val: r => r.purchasePrice },
+    { key: 'salePrice',    label: 'Sale',             fmt: r => cs() + fmtN(r.salePrice, 2), val: r => r.salePrice },
     { key: 'discount',     label: 'Discount %',      fmt: r => (r.discount * 100).toFixed(1) + '%', val: r => r.discount },
     { key: 'salesPerWeek', label: 'Sales/Wk',        fmt: r => r.salesPerWeek.toFixed(2), val: r => r.salesPerWeek },
     { key: 'currentStock', label: 'Stock',            fmt: r => r.currentStock, val: r => r.currentStock },
     { key: 'orderQty',     label: 'Order Qty',        fmt: r => r.optimal.orderQty, val: r => r.optimal.orderQty },
     { key: 'stockTurn',    label: 'Stock Turn',       fmt: r => r.metrics.stockTurn.toFixed(1), val: r => r.metrics.stockTurn },
     { key: 'gmroii',       label: 'GMROII',           fmt: r => r.metrics.gmroii.toFixed(2), val: r => r.metrics.gmroii },
-    { key: 'annualMargin', label: 'Annual Margin',    fmt: r => '$' + r.metrics.annualGrossMargin.toFixed(0), val: r => r.metrics.annualGrossMargin },
+    { key: 'annualMargin', label: 'Ann. Margin',      fmt: r => cs() + fmtN(r.metrics.annualGrossMargin, 0), val: r => r.metrics.annualGrossMargin },
     { key: 'cashflow',     label: 'Recovery',          fmt: r => {
       const d = r.metrics.daysToRecover;
       if (r.metrics.orderCost <= 0) return '<span style="color:var(--muted);">\u2014</span>';
@@ -819,8 +950,21 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
       return '<th data-col="' + c.key + '">' + c.label + '<span class="sort-arrow">' + arrow + '</span></th>';
     }).join('');
 
-    // Sort results
-    const sorted = [...results];
+    // Filter results
+    const filtered = getFilteredResults();
+
+    // Update status text
+    if (filtered.length === results.length) {
+      statusText.textContent = results.length + ' titles loaded';
+    } else {
+      const parts = [];
+      if (filterLowGmroii) parts.push('GMROII < 1');
+      if (searchQuery) parts.push('search: "' + searchQuery + '"');
+      statusText.textContent = results.length + ' titles loaded (showing ' + filtered.length + ' \u2014 ' + parts.join(', ') + ')';
+    }
+
+    // Sort filtered
+    const sorted = [...filtered];
     const col = columns.find(c => c.key === sortCol);
     if (col) {
       sorted.sort((a, b) => {
@@ -850,6 +994,37 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
       }
     });
     tableBody.innerHTML = html;
+
+    // Totals row
+    if (filtered.length > 0) {
+      let totPurchase = 0, totSale = 0, totSalesWk = 0, totStock = 0, totOrderQty = 0, totAnnualMargin = 0;
+      filtered.forEach(r => {
+        totPurchase += r.purchasePrice * r.currentStock;
+        totSale += r.salePrice * r.currentStock;
+        totSalesWk += r.salesPerWeek;
+        totStock += r.currentStock;
+        totOrderQty += r.optimal.orderQty;
+        totAnnualMargin += r.metrics.annualGrossMargin;
+      });
+      const totals = {
+        isbn: 'TOTAL',
+        title: filtered.length + ' titles',
+        purchasePrice: cs() + fmtN(totPurchase, 0),
+        salePrice: cs() + fmtN(totSale, 0),
+        discount: '',
+        salesPerWeek: fmtN(totSalesWk, 2),
+        currentStock: fmtN(totStock, 0),
+        orderQty: fmtN(totOrderQty, 0),
+        stockTurn: '',
+        gmroii: '',
+        annualMargin: cs() + fmtN(totAnnualMargin, 0),
+        cashflow: ''
+      };
+      const keys = ['isbn','title','purchasePrice','salePrice','discount','salesPerWeek','currentStock','orderQty','stockTurn','gmroii','annualMargin','cashflow'];
+      tableFoot.innerHTML = '<tr>' + keys.map(k => '<td>' + totals[k] + '</td>').join('') + '</tr>';
+    } else {
+      tableFoot.innerHTML = '';
+    }
 
     // If expanded, build detail panel
     if (expandedIdx >= 0) {
@@ -986,7 +1161,7 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
       <div class="metric-card highlight">
         <div class="metric-label">GMROII</div>
         <div class="metric-value">${m.gmroii.toFixed(2)}</div>
-        <div class="metric-sub">$ earned per $ invested/yr</div>
+        <div class="metric-sub">${cs()} earned per ${cs()} invested/yr</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">GMROS (Discount)</div>
@@ -1000,28 +1175,28 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
       </div>
       <div class="metric-card">
         <div class="metric-label">Cost / Copy</div>
-        <div class="metric-value">$${m.costPerCopy.toFixed(2)}</div>
-        <div class="metric-sub">Margin: $${m.marginPerCopy.toFixed(2)}</div>
+        <div class="metric-value">${cs()}${fmtN(m.costPerCopy, 2)}</div>
+        <div class="metric-sub">Margin: ${cs()}${fmtN(m.marginPerCopy, 2)}</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Margin per $ Invested</div>
+        <div class="metric-label">Margin per ${cs()} Invested</div>
         <div class="metric-value">${m.marginPerDollar.toFixed(3)}</div>
         <div class="metric-sub">discount / (1 - discount)</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Avg Inventory (cost)</div>
-        <div class="metric-value">$${m.avgInvAtCost.toFixed(0)}</div>
+        <div class="metric-value">${cs()}${fmtN(m.avgInvAtCost, 0)}</div>
         <div class="metric-sub">${m.avgUnits.toFixed(1)} units on avg</div>
       </div>
       <div class="metric-card ${gmroiiClass}">
         <div class="metric-label">Annual Gross Margin</div>
-        <div class="metric-value">$${m.annualGrossMargin.toFixed(0)}</div>
+        <div class="metric-value">${cs()}${fmtN(m.annualGrossMargin, 0)}</div>
         <div class="metric-sub">GMROII &times; avg inv at cost</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Cash Flow</div>
         <div class="metric-value cashflow-${m.cashflow}" style="font-size:0.9rem;">${m.cashflowText}</div>
-        <div class="metric-sub">Order cost: $${m.orderCost.toFixed(0)}</div>
+        <div class="metric-sub">Order cost: ${cs()}${fmtN(m.orderCost, 0)}</div>
       </div>
     `;
   }
@@ -1104,7 +1279,7 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
         '<td>' + m.avgUnits.toFixed(1) + ' units</td>' +
         '<td>' + m.stockTurn.toFixed(1) + '</td>' +
         '<td>' + m.gmroii.toFixed(2) + '</td>' +
-        '<td>$' + m.annualGrossMargin.toFixed(0) + '</td>' +
+        '<td>' + cs() + fmtN(m.annualGrossMargin, 0) + '</td>' +
         '</tr>';
     }).join('');
   }
@@ -1162,6 +1337,24 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
   });
   globalLeadTime.addEventListener('input', () => {
     if (titles.length > 0) recalcAll();
+  });
+
+  // Currency change → re-render
+  globalCurrency.addEventListener('change', () => {
+    if (results.length > 0) {
+      renderPortfolio();
+      renderTable();
+    }
+  });
+
+  // Search input with debounce
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+      searchQuery = searchInput.value.trim();
+      expandedIdx = -1;
+      renderTable();
+    }, 200);
   });
 
   // Sort on header click
