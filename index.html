@@ -700,7 +700,7 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     const coverageDays = reorderDays + leadTimeDays;
     const coverageWeeks = coverageDays / 7;
     const minCoverageQty = Math.max(0, Math.ceil(title.salesPerWeek * coverageWeeks) - title.currentStock);
-    const qty = Math.max(1, minCoverageQty);
+    const qty = minCoverageQty;
     const inp = {
       price: title.salePrice,
       discount: title.discount,
@@ -1248,7 +1248,7 @@ h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     const minCoverageQty = Math.max(0, Math.ceil(inp.salesPerWeek * coverageWeeks) - inp.stock);
 
     // Best = minCoverageQty: exact quantity for full coverage + best GMROII
-    const bestQty = Math.max(1, minCoverageQty);
+    const bestQty = minCoverageQty;
 
     const qtys = [0, 1, 3, 5, 10, 25, 50];
     if (minCoverageQty > 0 && !qtys.includes(minCoverageQty)) {
